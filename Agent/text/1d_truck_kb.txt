@@ -1,0 +1,52 @@
+Truck Task One-Dimensional (1-D) Physics and Computing Knowledge Base
+
+
+Physics Concepts
+
+'Displacement' is how far something moves from its starting point and in which direction. It's different from distance because it tells us the shortest path between the starting and ending points, and it also shows if the object moved forward (positive displacement) or backward (negative displacement). Displacement is typically measured in units of 'meters' (m) and may be represented by 'delta_x,' i.e., the change in position.
+
+'Velocity' is like speed in that it tells how fast an object moves. Unlike speed, however,  velocity also tells us the direction. It shows how fast something is moving and which way it's going. Objects will have a positive velocity value when moving forward and a negative one when moving backward. Velocity is often measured in units of 'meters per second' (m/s) and may be represented by both 'v_x' or 'v_0x,' where v_x is the final velocity and v_0x is the initial velocity.
+
+'Acceleration' is how quickly something speeds up, slows down, or changes direction. If a car is speeding up, it's accelerating. If it's slowing down, that's also acceleration, but in the opposite way, so it's considered deceleration. Acceleration tells us how fast the speed of something is changing. Acceleration is usually measured in units of 'meters per second squared' (m/s^2 or m/s/s) and may be represented by 'a_x'.
+
+'Time' is the interval between two events or the time it takes for something to happen. For example, if a car takes 2 seconds to go from a complete stop to 4 m/s, then 2 seconds is the time it takes for that change. Time helps us measure how fast or slow things move. It is usually measured in units of 'seconds' (s) and may be represented by 't' or 'DeltaT', i.e., the change in time.
+
+Final Velocity Equation: v_x = v_0x + a_x*t, where v_x is the final velocity, v_0x is the initial velocity, a_x is the acceleration, and t is the time interval. This equation states that the final velocity, v_x, is equal to the initial velocity (v_0x) plus the object’s acceleration (a_x) multiplied by the time interval (t).
+
+Displacement Equation: delta_x = v_0x*t + (1/2)*a_x*(t^2), where delta_x is the displacement (e.g., the lookahead distance), v_0x is the initial velocity, t is the time interval, and a_x is the acceleration. This equation states that the displacement, delta_x, is equal to the initial velocity (v_0x) multiplied by the time interval (t), plus one-half the object's acceleration (a_x) multiplied by the time interval (t) squared.
+
+Velocity Squared Equation: v_x^2 = v_0x^2 + 2*a_x*delta_x, where v_x is the final velocity, v_0x is the initial velocity, a_x is the acceleration, and delta_x is the displacement (e.g., lookahead distance). This equation states that the final velocity (v_x) squared is equal to the initial velocity (v_0x) squared, plus two times the object’s acceleration (a_x) times the displacement (delta_x). 
+
+Updating Velocity Equation: velocity += acceleration*time. This means that the final velocity of an object (v_x) is calculated by adding the product of acceleration (a_x) and time (t) to the initial velocity (v_0x).
+
+Updating Position Equation: position += velocity*time. This means that an object's final position is calculated by adding the product of velocity and time to its initial position. 
+
+
+Computing Concepts
+
+A 'variable' is a value in a computer program that can hold different values at different times. It is called a variable because the user can change it. For instance, a car may have a 'speed' variable that changes as the car accelerates.
+
+A 'constant' is a value in a computer program that does not change during the simulation or the program's execution. Once it is set, it does not change.
+
+'Initializing variables' means setting environment variables to their starting values before using them in a program or simulation.
+
+'Updating variables' involves changing the values of existing variables based on calculations or events as the program or simulation runs. This could include updating them by setting them to specific values (e.g., x=6) or updating them relative to their previous values (e.g., x += 6).
+
+'Loops' are programming structures that repeat instructions multiple times, often based on a condition. For instance, a simulation loop may perform several iterations based on a predefined time interval for each iteration.
+
+'Conditional statements' are 'if' statements used in programming to handle different cases (conditions). For instance, you can use conditional statements to update a car's 'speed' variable depending on if the car is accelerating or decelerating.
+
+
+Difficulties
+
+Students can often have difficulties understanding the difference between initializing and updating variables, and translating this knowledge into computational form. In C2STEM, initializing variables is done using 'Set' blocks, while updating variables is done using 'Change By' blocks. Students often conflate the two, and this misunderstanding manifests in the C2STEM environment in several ways during the Truck Task. First, the students must begin the task by initializing the variables and constants, including speed_limit, DeltaT, x_acceleration, x_position, and x_velocity. During this process, it is possible that students may try and use the 'Change By' blocks instead of the 'Set' blocks. If this happens, the model will not work, as the students are trying to update variables that they have not yet initialized. Second, directly under the Simulation_Step block, students must update the x_position and x_velocity variables by employing the 'Change X Position By' and 'Change X Velocity By' blocks, respectively. Erroneously, students will sometimes opt for the 'Set X Position' and 'Set X Velocity' blocks, which do not consider the previous position and velocity of the truck and will result in model errors. Lastly, this error is also seen in the conditional statements when students use 'Change By' blocks for x_position or x_velocity when they should be using 'Set' blocks.
+
+Students may not be sure if acceleration can be set to a negative value, as this is unintuitive. In C2STEM, the sign of the velocity and acceleration values determines direction. If x_velocity is positive, it means the truck is going forwards; and if it is negative, it means the truck is going backwards. Similarly, if the sign for x_acceleration is positive, it means the truck is speeding up; and if the sign for x_acceleration is negative, it means that the truck is slowing down.
+
+Students may begin to see their truck move backwards if they do not use the Stop_Simulation block once the truck's velocity (x_velocity) reaches zero and its position (x_position) is greater than the stop_sign_position. This can also happen if the lookahead_distance is incorrectly calculated or a value of more than 28.125 is used for lookahead_distance. When this happens, the truck will begin to slow down too soon, resulting in the truck's velocity falling below zero before reaching the stop sign. This means that the stopping condition never gets triggered, and the truck just continues to reduce its acceleration to an increasingly negative value, moving faster and faster in the opposite direction. To address this issue, students will need to calculate proper lookahead distance by using the kinematic equations.
+
+Students often forget to initialize the DeltaT constant, which governs the duration of each Simulation Step. When this happens, the truck may behave in a manner other than expected, so it is important that students use the 'Set DeltaT' block when initializing their variables at the beginning of the Truck Task.
+
+C2STEM uses floating point numbers, which can create problems for students. For instance, to transition from the Speeding Up phase to the Cruising Phase, students must use this logical expression in their code: 'if the x_velocity is greater than 15 m/s, set x_acceleration to 0.' However, students will often use this logic instead: 'if the x_velocity is equal to 15 m/s, set x_acceleration to 0.' Because each simulation step updates based on DeltaT, and DeltaT is a float, it is possible that x_velocity will never be exactly 15 m/s. As such, students must be sure to use the greater than (>) operator instead of the equal to (=) operator.
+
+For the three conditional statements at the bottom of the portion of code under the Simulation_Step block, each must be attached one on top of the other, i.e., they cannot be nested. All three conditions are mutually exclusive, so if students inadvertently nest any of them, this will result in the nested condition never being triggered.

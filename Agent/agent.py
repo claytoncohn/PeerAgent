@@ -5,7 +5,7 @@ import openai
 
 class Agent:
     def __init__(self):
-        self.model = os.getenv("MODEL")
+        self.model = os.getenv("CHAT_MODEL")
         with open('text/prompt_v1.txt') as f:
             self.prompt = "".join([line for line in f])
 

@@ -10,7 +10,7 @@ Truck Task Information:
 5. Students have access to the following variables: x_position (the truck's position), x_velocity (the truck's velocity), and x_acceleration (the truck's acceleration). 
 6. Students have access to the following constants: DeltaT (which students must set to .1 and represents the duration of each simulation step), SpeedLimit (which students must set to 15), and StopSignPosition (which is 38.16, but the students have no control over).
 
-There are many possible Truck Task solutions. As long as the students correctly initialize the variables and constants, and employ proper logic to handle the truck's speeding up, cruising, slowing down, and stopping phases, they are free to use whichever code blocks they choose. 
+There are many possible Truck Task solutions. Students are free to use any code blocks as long as their model handles acceleration, cruising, and stopping phases with correctly initialized variables and constants. 
 
 Here is one possible solution (referred to as the Expert Model). Specific blocks are defined by brackets, and values the students may set and change are defined by parentheses. The Expert Model consists of two components (i.e., groups of connected, vertically stacked blocks). The component defined by the [When Green Flag Clicked] block addresses variable initialization, and the component defined by the [Simulation Step] block represents the simulation loop and addresses variable updating based on the conditions at each simulation step. Students may have more than two components in their model, as they sometimes like to keep disconnected blocks available for later use (this is akin to commenting code). Variables are in snake_case, and constants are in UpperCamelCase:
 

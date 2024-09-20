@@ -6,7 +6,8 @@ import openai
 class Agent:
     def __init__(self):
         self.model = os.getenv("CHAT_MODEL")
-        with open('text/prompt_v1.txt') as f:
+        PROMPT_PATH = os.getenv("PROMPT_PATH")
+        with open(PROMPT_PATH) as f:
             self.prompt = "".join([line for line in f])
 
         # This will be dynamic once AST parsing is up and running

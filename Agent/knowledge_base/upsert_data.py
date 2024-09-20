@@ -1,50 +1,53 @@
-import pinecone as pc
+from pinecone import Pinecone
 import openai
 import os
 from dotenv import load_dotenv
 load_dotenv()
+
+PINECONE_API_KEY = os.getenv(f"PINECONE_API_KEY")
+pc = Pinecone(api_key=PINECONE_API_KEY)
 
 KB_PATH = os.getenv("KB_PATH")
 with open(KB_PATH) as f:
     data_string = "".join([line for line in f])
 
 data_arr = data_string.split("\n\n")
-print(data_arr)
 
+data_labels = ["displacement","velocity","acceleration","time","final_velocity_eq","displacement_eq",\
+               "velocity_squared_eq","updating_velocity_eq","updating_position_eq","variable","constant",\
+                "init_variable","update_variable","loops","conditionals"]
 
-# data = [
+assert len(data_arr)==len(data_labels)==15
 
-#     {"id": "vec1", "text": "Apple is a popular fruit known for its sweetness and crisp texture."},
+data = [{"id":data_labels[i], "text":data_arr[i]} for i in range(len(data_labels))]
 
-#     {"id": "vec2", "text": "The tech company Apple is known for its innovative products like the iPhone."},
+def embed(docs: list[str]) -> list[list[float]]:
+    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
+    res = openai.embeddings.create(
+        input=docs,
+        model=EMBEDDING_MODEL
+    )
+    doc_embeds = [r.embedding for r in res.data]
+    return doc_embeds
 
-#     {"id": "vec3", "text": "Many people enjoy eating apples as a healthy snack."},
+text_to_embed = [d["text"] for d in data]
+embeddings = embed(docs=text_to_embed)
 
-#     {"id": "vec4", "text": "Apple Inc. has revolutionized the tech industry with its sleek designs and user-friendly interfaces."},
+INDEX_NAME = os.getenv("PINECONE_INDEX")
+index = pc.Index(INDEX_NAME)
 
-#     {"id": "vec5", "text": "An apple a day keeps the doctor away, as the saying goes."},
+vectors = []
+for d, e in zip(data, embeddings):
+    vectors.append({
+        "id": d['id'],
+        "values": e,
+        "metadata": {'text': d['text']}
+    })
 
-#     {"id": "vec6", "text": "Apple Computer Company was founded on April 1, 1976, by Steve Jobs, Steve Wozniak, and Ronald Wayne as a partnership."}
+PINECONE_NAMESPACE = os.getenv("PINECONE_NAMESPACE")
+index.upsert(
+    vectors=vectors,
+    namespace=PINECONE_NAMESPACE
+)
 
-# ]
-
-# embeddings = pc.inference.embed(
-
-#     model="multilingual-e5-large",
-
-#     inputs=[d['text'] for d in data],
-
-#     parameters={"input_type": "passage", "truncate": "END"}
-
-# )
-
-# EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
-# def embed(docs: list[str]) -> list[list[float]]:
-#     res = openai.embeddings.create(
-#         input=docs,
-#         model=EMBEDDING_MODEL
-#     )
-#     doc_embeds = [r.embedding for r in res.data]
-#     return doc_embeds
-
-# print(embeddings[0])
+# print(index.describe_index_stats())

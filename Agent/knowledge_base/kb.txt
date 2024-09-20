@@ -2,9 +2,9 @@
 
 'Velocity' is like speed in that it tells how fast an object moves. Unlike speed, however,  velocity also tells us the direction. It shows how fast something is moving and which way it's going. Objects will have a positive velocity value when moving forward and a negative one when moving backward. Velocity is often measured in units of 'meters per second' (m/s) and may be represented by both 'v_x' or 'v_0x,' where v_x is the final velocity and v_0x is the initial velocity.
 
-'Acceleration' is how quickly something speeds up, slows down, or changes direction. If a car is speeding up, it's accelerating. If it's slowing down, that's also acceleration, but in the opposite way, so it's considered deceleration. Acceleration tells us how fast the speed of something is changing. Acceleration is usually measured in units of 'meters per second squared' (m/s^2 or m/s/s) and may be represented by 'a_x'.
+'Acceleration' is how quickly something speeds up, slows down, or changes direction. If an object is speeding up, it's accelerating. If it's slowing down, that's also acceleration, but in the opposite way, so it's considered deceleration. Acceleration tells us how fast the speed of something is changing. Acceleration is usually measured in units of 'meters per second squared' (m/s^2 or m/s/s) and may be represented by 'a_x'.
 
-'Time' is the interval between two events or the time it takes for something to happen. For example, if a car takes 2 seconds to go from a complete stop to 4 m/s, then 2 seconds is the time it takes for that change. Time helps us measure how fast or slow things move. It is usually measured in units of 'seconds' (s) and may be represented by 't' or 'DeltaT', i.e., the change in time.
+'Time' is the interval between two events or the time it takes for something to happen. For example, if an object takes 2 seconds to go from a complete stop to 4 m/s, then 2 seconds is the time it takes for that change. Time helps us measure how fast or slow things move. It is usually measured in units of 'seconds' (s) and may be represented by 't' or 'DeltaT', i.e., the change in time.
 
 Final Velocity Equation: v_x = v_0x + a_x*t, where v_x is the final velocity, v_0x is the initial velocity, a_x is the acceleration, and t is the time interval. This equation states that the final velocity, v_x, is equal to the initial velocity (v_0x) plus the object’s acceleration (a_x) multiplied by the time interval (t).
 
@@ -16,7 +16,7 @@ Updating Velocity Equation: velocity += acceleration*time. This means that the f
 
 Updating Position Equation: position += velocity*time. This means that an object's final position is calculated by adding the product of velocity and time to its initial position. 
 
-A 'variable' is a value in a computer program that can hold different values at different times. It is called a variable because the user can change it. For instance, a car may have a 'speed' variable that changes as the car accelerates.
+A 'variable' is a value in a computer program that can hold different values at different times. It is called a variable because the user can change it. For instance, an object may have a 'speed' variable that changes as the object accelerates.
 
 A 'constant' is a value in a computer program that does not change during the simulation or the program's execution. Once it is set, it does not change.
 
@@ -26,4 +26,4 @@ A 'constant' is a value in a computer program that does not change during the si
 
 'Loops' are programming structures that repeat instructions multiple times, often based on a condition. For instance, a simulation loop may perform several iterations based on a predefined time interval for each iteration.
 
-'Conditional statements' are 'if' statements used in programming to handle different cases (conditions). For instance, you can use conditional statements to update a car's 'speed' variable depending on if the car is accelerating or decelerating.
+'Conditional statements' are 'if' statements used in programming to handle different cases (conditions). For instance, you can use conditional statements to update an object's 'speed' variable depending on if the object is accelerating or decelerating.

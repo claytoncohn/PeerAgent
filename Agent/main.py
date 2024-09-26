@@ -1,6 +1,5 @@
-from agent import Agent
+from Agent import Agent
 
-# Why is my truck moving backwards?
 if __name__ =="__main__":
     _ = input()
     agent = Agent()

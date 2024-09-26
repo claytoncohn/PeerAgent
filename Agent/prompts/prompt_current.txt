@@ -10,7 +10,7 @@ Truck Task Information:
 5. Students have access to the following variables: x_position (the truck's position), x_velocity (the truck's velocity), and x_acceleration (the truck's acceleration). 
 6. Students have access to the following constants: DeltaT (which students must set to .1 and represents the duration of each simulation step), SpeedLimit (which students must set to 15), and StopSignPosition (which is 38.16, but the students have no control over).
 
-Task Context:
+Task Context Categories:
 Students' task context is derived from system logs and tells us what they are currently doing in the environment. Task context includes 4 categories, and students can be working on more than one simultaneously:
 1. Initialization: students are currently initializing their variables and constants.
 2. Conditional Statements: Students are working on an 'if' statement.

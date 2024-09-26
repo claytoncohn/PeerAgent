@@ -5,20 +5,24 @@ import openai
 
 class Agent:
     def __init__(self):
+        ENV = os.getenv("ENV")
+        if ENV == "dev":
+            self.student = os.getenv("STUDENT")
+
+            # This will be dynamic once AST parsing is up and running
+            # Currently, this points to the 2021 SSMV data (G9) when the students' truck started going backwards
+            with open(f'test/{self.student}/test_student_model.txt') as f:
+                self.student_model = "".join([line for line in f])
+
+            # This will be dymamic once RAG retrieval implemented
+            # Currently this points to relevant part of knowledge base
+            with open(f'test/{self.student}/test_domain_context.txt') as f:
+                self.domain_context = "".join([line for line in f])
+
         self.model = os.getenv("CHAT_MODEL")
         PROMPT_PATH = os.getenv("PROMPT_PATH")
         with open(PROMPT_PATH) as f:
             self.prompt = "".join([line for line in f])
-
-        # This will be dynamic once AST parsing is up and running
-        # Currently, this points to the 2021 SSMV data (G9) when the students' truck started going backwards
-        with open('test/test_student_model.txt') as f:
-            self.student_model = "".join([line for line in f])
-
-        # This will be dymamic once RAG retrieval implemented
-        # Currently this points to relevant part of knowledge base
-        with open('test/test_domain_context.txt') as f:
-            self.domain_context = "".join([line for line in f])
 
         self.messages = [
             {"role":"system", "content":self.prompt},

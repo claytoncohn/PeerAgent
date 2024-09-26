@@ -8,10 +8,10 @@ PINECONE_API_KEY = os.getenv(f"PINECONE_API_KEY")
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
 # Good
-queries = ["What is velocity?", "I forgot the kinematic equations.", "What is the relationship between acceleration and velocity?"]
+# queries = ["What is velocity?", "I forgot the kinematic equations.", "What is the relationship between acceleration and velocity?"]
 
 # Bad
-# queries = ["truck won't move?", "why is it moving backwards?", "it's not slowing down", "my dog is my best friend!"]
+queries = ["truck won't move?", "why is it moving backwards?", "it's not slowing down", "my dog is my best friend!"]
 
 embeddings = embed(queries)
 

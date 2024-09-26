@@ -12,12 +12,12 @@ class Agent:
 
         # This will be dynamic once AST parsing is up and running
         # Currently, this points to the 2021 SSMV data (G9) when the students' truck started going backwards
-        with open('text/student_model.txt') as f:
+        with open('test/test_student_model.txt') as f:
             self.student_model = "".join([line for line in f])
 
         # This will be dymamic once RAG retrieval implemented
         # Currently this points to relevant part of knowledge base
-        with open('text/domain_context.txt') as f:
+        with open('test/test_domain_context.txt') as f:
             self.domain_context = "".join([line for line in f])
 
         self.messages = [

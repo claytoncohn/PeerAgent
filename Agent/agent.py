@@ -1,28 +1,52 @@
 
 from RAG import RAG
-import os
 from dotenv import load_dotenv
+from globals import Config
 import openai
+import logging
+import time
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO)
+
 class Agent:
+    """
+    A collaborative "knowledgeable peer" agent that interacts with users using RAG (Retrieval Augmented Generation)
+    and OpenAI's chat completions API.
+
+    The Agent class is responsible for:
+    - Managing conversation flow.
+    - Loading system prompts, task contexts, and student models based on the environment.
+    - Retrieving domain knowledge using a RAG instance and augmenting user queries.
+    - Communicating with OpenAI's API to generate conversational responses.
+
+    Attributes
+    ----------
+    RAG : RAG
+        An instance of the RAG class for handling retrieval-augmented generation for domain knowledge.
+    has_spoken : bool
+        A flag indicating whether the agent has already spoken in the current conversation.
+    messages : list
+        A list of dictionaries representing the conversation history.
+    domain_context : str
+        A string that stores the domain context retrieved from the RAG instance during the initial query.
+    student_model : str, optional
+        The student's computational model, loaded from a file, used in "dev" mode for testing.
+    task_context : str, optional
+        The student's task context, loaded from a file, used in "dev" mode for testing.
+    """
+
     def __init__(self):
-        self.name = os.getenv("AGENT_NAME", "Copa")
         self.RAG = RAG() 
-        self.ENV = os.getenv("ENV", "dev")
-        self.model = os.getenv("CHAT_MODEL", "gpt-4o")
         self.has_spoken = False
-        self.messages = [{"role": "system", "content": self._load_file(os.getenv("PROMPT_PATH"))}]
+        self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
         self.domain_context = ""
 
-        if self.ENV == "dev":
-            self.student = os.getenv("STUDENT", "1")
-
-            # These will be dynamic once AST parsing is up and running
-            # Currently, this points to the 2021 SSMV data (G9) when the students' truck started going backwards
-            self.student_model = self._load_file(f'test/{self.student}/test_student_model.txt')
-            self.task_context = self._load_file(f'test/{self.student}/test_task_context.txt')
+        if Config.env == "dev":
+            # This is for testing purposes only and will be dynamic in production
+            self.student_model = self._load_file(f'test/{Config.student}/test_student_model.txt')
+            self.task_context = self._load_file(f'test/{Config.student}/test_task_context.txt')
 
     def _load_file(self, file_path):
         """
@@ -41,34 +65,68 @@ class Agent:
         try:
             with open(file_path, 'r') as f:
                 return f.read()
-        except (FileNotFoundError, IOError):
-            print(f"Error: File '{file_path}' not found.")
+        except (FileNotFoundError, IOError) as e:
+            logging.error(f"Error loading file '{file_path}': {e}")
             return ""
 
     def _get_openai_response(self, messages):
         """
-        Helper function to call OpenAI API and return the response.
+        Calls the OpenAI API to generate a response based on the provided conversation history.
+
+        This method sends a list of conversation messages to the OpenAI chat completions API
+        and retrieves the assistant's response. If the API call fails due to rate limits, 
+        connection issues, or other errors, it retries the request up to `Config.max_retries` 
+        times, with an exponential backoff between retries.
 
         Parameters
         ----------
-        messages : list
-            List of conversation messages.
+        messages : list of dict
+            A list of dictionaries representing the conversation history, with each dictionary 
+            containing the role (e.g., "system", "user", "assistant") and the content of the message.
 
         Returns
         -------
         str
-            Assistant's response or an error message.
+            The assistant's response message if the API call is successful, or an error message if 
+            the API fails after all retries.
+
+        Raises
+        ------
+        openai.RateLimitError
+            Raised when the OpenAI API's rate limit is exceeded. The function will retry after an 
+            exponential backoff.
+        openai.APIConnectionError
+            Raised when there is a connection issue with the OpenAI API. The function will retry 
+            after an exponential backoff.
+        openai.APIError
+            Raised for other general API errors. The function will retry after an exponential backoff.
+
+        Notes
+        -----
+        - The retry mechanism is controlled by `Config.max_retries`, which specifies the maximum number of retry attempts.
+        - The exponential backoff mechanism waits for `Config.backoff_factor * (2 ** i)` seconds before retrying, where `i` 
+        is the current retry attempt.
+        - If the retries are exhausted, a default error message is returned: 
+        "I'm sorry, I don't think I'm understanding you correctly. Can you explain?"
         """
-        try:
-            response = openai.chat.completions.create(
-                model=self.model,
-                temperature=0.0,
-                messages=messages
-            )
-            return response.choices[0].message.content
-        except openai.error.OpenAIError as e:
-            print(f"Error during OpenAI API call: {e}")
-            return "OpenAI API call failure."
+        for i in range(Config.max_retries):
+            try:
+                response = openai.chat.completions.create(
+                    model=Config.model,
+                    temperature=0.0,
+                    messages=messages
+                )
+                return response.choices[0].message.content
+            except openai.RateLimitError:
+                logging.error(f"Open AI Rate limit exceeded for response call from Agent, retry {i+1}/{Config.max_retries}.")
+                time.sleep(Config.backoff_factor * (2 ** i))
+            except openai.APIConnectionError as e:
+                logging.error(f"OpenAI API connection error for response call from Agent: {e}, retry {i+1}/{Config.max_retries}")
+                time.sleep(Config.backoff_factor * (2 ** i))
+            except openai.APIError as e:
+                logging.error(f"OpenAI API error for response call from Agent: {e}, retry {i+1}/{Config.max_retries}")
+                time.sleep(Config.backoff_factor * (2 ** i))
+        return "I'm sorry, I don't think I'm understanding you correctly. Can you explain?"
         
     def print_messages(self):
         """
@@ -94,16 +152,13 @@ class Agent:
         """
         if not self.has_spoken:
             # First query: Perform RAG retrieval
-            try:
-                q_embed = self.RAG.get_embeddings(user_query)[0]
-                matches = self.RAG.retrieve(q_embed, 3)["matches"]
-                domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
-                self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
-            except Exception as e:
-                print(f"Error during RAG retrieval: {e}")
-        
+            q_embed = self.RAG.get_embeddings([user_query])[0]
+            matches = self.RAG.retrieve(q_embed, 3)["matches"]
+            domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
+            self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
+    
         # Create the user prompt including task context and student model
-        if self.ENV == "dev":
+        if Config.env == "dev":
             if not self.task_context or not self.student_model:
                 print("Warning: Task context or student model missing.")
             user_prompt_str = f"Task Context:\n{self.task_context}\n\nStudent Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
@@ -114,7 +169,7 @@ class Agent:
 
         # Get and print assistant response
         response_text = self._get_openai_response(self.messages)
-        print(f"\n{self.name}: {response_text}\n")
+        print(f"\n{Config.name}: {response_text}\n")
         self.messages.append({"role": "assistant", "content": response_text})
         self.has_spoken = True
 
@@ -126,7 +181,7 @@ class Agent:
         --------------------------------------
         I'm Copa, a collaborative peer agent! 
 
-        What can I help you with?
+        What are we working on? How can I help?
         --------------------------------------
         """
         user_query = input(intro_str).lower()
@@ -138,6 +193,6 @@ class Agent:
         while (new_query := input().lower()) not in {"q", "quit", "stop", "end"}:
             self._process_query(new_query)
 
-        # Optionally print messages in 'dev' environment
-        if self.ENV == "dev":
+        # Optionally print messages in 'dev' environment once conversation ends
+        if Config.env == "dev":
             self.print_messages()

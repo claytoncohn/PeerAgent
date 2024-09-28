@@ -75,6 +75,7 @@ class RAG:
                     input=texts,
                     model=self.embedding_model
                 )
+                logging.info(f"Successfully retrieved embeddings from OpenAI embedding model in RAG class.'")
                 doc_embeds = [r.embedding for r in res.data]
                 return doc_embeds 
             except openai.RateLimitError:
@@ -125,6 +126,7 @@ class RAG:
                     include_values=False,
                     include_metadata=True
                 )
+                logging.info(f"Successfully retrieved domain knowledge from vector store in RAG class.'")
                 return result
             except Exception as e:
                 logging.error(f"Pinecone API error for retrieving from knowledge base in RAG class: {e}, retry {i+1}/{Config.max_retries}")

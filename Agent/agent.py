@@ -44,7 +44,10 @@ class Agent:
         self.domain_context = ""
 
         if Config.env == "dev":
-            # This is for testing purposes only and will be dynamic in production
+            self.student_model = self._load_file(f'test/{Config.student}/test_student_model.txt')
+            self.task_context = self._load_file(f'test/{Config.student}/test_task_context.txt')
+        else:
+            # This will be dynamic in production, but right now will have same values as in dev
             self.student_model = self._load_file(f'test/{Config.student}/test_student_model.txt')
             self.task_context = self._load_file(f'test/{Config.student}/test_task_context.txt')
 
@@ -64,9 +67,10 @@ class Agent:
         """
         try:
             with open(file_path, 'r') as f:
+                logging.info(f"Successfully loaded file from Agent class: '{file_path}'")
                 return f.read()
         except (FileNotFoundError, IOError) as e:
-            logging.error(f"Error loading file '{file_path}': {e}")
+            logging.error(f"Error loading file from Agent class: '{file_path}': {e}")
             return ""
 
     def _get_openai_response(self, messages):
@@ -116,6 +120,7 @@ class Agent:
                     temperature=0.0,
                     messages=messages
                 )
+                logging.info(f"Successfully called OpenAI API in Agent class.'")
                 return response.choices[0].message.content
             except openai.RateLimitError:
                 logging.error(f"Open AI Rate limit exceeded for response call from Agent, retry {i+1}/{Config.max_retries}.")
@@ -157,21 +162,22 @@ class Agent:
             domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
             self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
     
-        # Create the user prompt including task context and student model
-        if Config.env == "dev":
-            if not self.task_context or not self.student_model:
-                print("Warning: Task context or student model missing.")
-            user_prompt_str = f"Task Context:\n{self.task_context}\n\nStudent Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
+            # Create the initial user message including task context and student model
+            user_message_str = f"Task Context:\n{self.task_context}\n\nStudent Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
         else:
-            user_prompt_str = f"User Query:\n{user_query}"
+            # Subsequent queries: only include the user query/response in the messages
+            user_message_str = user_query
         
-        self.messages.append({"role": "user", "content": user_prompt_str})
+        self.messages.append({"role": "user", "content": user_message_str})
 
         # Get and print assistant response
         response_text = self._get_openai_response(self.messages)
         print(f"\n{Config.name}: {response_text}\n")
         self.messages.append({"role": "assistant", "content": response_text})
-        self.has_spoken = True
+
+        # Set flag to indicate that the agent has spoken
+        if not self.has_spoken:
+            self.has_spoken = True
 
     def talk(self):
         """

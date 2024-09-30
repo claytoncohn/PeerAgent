@@ -3,7 +3,7 @@ import os
 class Config:
 
     # Agent
-    name = os.getenv("AGENT_NAME", "Copa")
+    agent_name = os.getenv("AGENT_NAME", "Copa")
     env = os.getenv("ENV", "dev")
     model = os.getenv("CHAT_MODEL", "gpt-4o")
     prompt_path = os.getenv("PROMPT_PATH")

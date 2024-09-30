@@ -73,7 +73,7 @@ class Agent:
             logging.error(f"Error loading file from Agent class: '{file_path}': {e}")
             return ""
 
-    def _get_openai_response(self, messages):
+    def _get_openai_response(self, messages, temperature=0.0):
         """
         Calls the OpenAI API to generate a response based on the provided conversation history.
 
@@ -117,7 +117,7 @@ class Agent:
             try:
                 response = openai.chat.completions.create(
                     model=Config.model,
-                    temperature=0.0,
+                    temperature=temperature,
                     messages=messages
                 )
                 logging.info(f"Successfully called OpenAI API in Agent class.'")
@@ -172,7 +172,7 @@ class Agent:
 
         # Get and print assistant response
         response_text = self._get_openai_response(self.messages)
-        print(f"\n{Config.name}: {response_text}\n")
+        print(f"\n{Config.agent_name}: {response_text}\n")
         self.messages.append({"role": "assistant", "content": response_text})
 
         # Set flag to indicate that the agent has spoken
@@ -183,20 +183,24 @@ class Agent:
         """
         Starts an interactive conversation with the user and continues until a termination command is given.
         """
-        intro_str = """
-        --------------------------------------
-        I'm Copa, a collaborative peer agent! 
-
-        What are we working on? How can I help?
-        --------------------------------------
+        intro_str = f"""
+        Hi, I'm {Config.agent_name}, a collaborative peer agent! How can I help?
         """
-        user_query = input(intro_str).lower()
+        intro_str_rephrase = self._get_openai_response(
+            messages=
+                [
+                    {"role": "system", "content": "Rephrase this introduction:\n"},
+                    {"role": "user", "content": intro_str}
+                ],
+            temperature=0.1
+        )
+        user_query = input(f"\n{Config.agent_name}: "+intro_str_rephrase+"\n\n"+"Student: ").lower()
 
         # Process the first query
         self._process_query(user_query)
 
         # Loop to process further queries
-        while (new_query := input().lower()) not in {"q", "quit", "stop", "end"}:
+        while (new_query := input("Student: ").lower()) not in {"q", "quit", "stop", "end"}:
             self._process_query(new_query)
 
         # Optionally print messages in 'dev' environment once conversation ends

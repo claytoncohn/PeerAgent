@@ -11,7 +11,7 @@ class Config:
     prompt_path = os.getenv("PROMPT_PATH")
 
     # Testing
-    group = os.getenv("GROUP", "3")
+    group = os.getenv("GROUP", "9")
 
     # RAG
     embedding_model  = os.getenv("EMBEDDING_MODEL")

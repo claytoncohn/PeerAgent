@@ -44,12 +44,12 @@ class Agent:
         self.domain_context = ""
 
         if Config.env == "dev":
-            self.student_model = self._load_file(f'test/{Config.student}/test_student_model.txt')
-            self.task_context = self._load_file(f'test/{Config.student}/test_task_context.txt')
+            self.student_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
+            self.task_context = self._load_file(f'test/g{Config.group}/test_task_context.txt')
         else:
             # This will be dynamic in production, but right now will have same values as in dev
-            self.student_model = self._load_file(f'test/{Config.student}/test_student_model.txt')
-            self.task_context = self._load_file(f'test/{Config.student}/test_task_context.txt')
+            self.student_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
+            self.task_context = self._load_file(f'test/g{Config.group}/test_task_context.txt')
 
     def _load_file(self, file_path):
         """
@@ -184,7 +184,7 @@ class Agent:
         Starts an interactive conversation with the user and continues until a termination command is given.
         """
         intro_str = f"""
-        Hi, I'm {Config.agent_name}, a collaborative peer agent! How can I help?
+        Hi, I'm {Config.agent_name}, a collaborative peer agent! Is there something I can help you with?
         """
         intro_str_rephrase = self._get_openai_response(
             messages=
@@ -192,17 +192,30 @@ class Agent:
                     {"role": "system", "content": "Rephrase this introduction:\n"},
                     {"role": "user", "content": intro_str}
                 ],
-            temperature=0.1
+            temperature=0.2
         )
+
+        stop_words = {"q", "quit", "stop", "end"}
+        
         user_query = input(f"\n{Config.agent_name}: "+intro_str_rephrase+"\n\n"+"Student: ").lower()
+
+        if user_query in stop_words:
+            self.end_conversation()
+            return
 
         # Process the first query
         self._process_query(user_query)
 
         # Loop to process further queries
-        while (new_query := input("Student: ").lower()) not in {"q", "quit", "stop", "end"}:
+        while (new_query := input("Student: ").lower()) not in stop_words:
             self._process_query(new_query)
 
+        self.end_conversation()
+
+    def end_conversation(self):
+        """
+        Terminates the conversation.
+        """
         # Optionally print messages in 'dev' environment once conversation ends
         if Config.env == "dev":
             self.print_messages()

@@ -1,0 +1,12 @@
+[When Green Flag Clicked]
+[Set x_position to (-60)]
+[Set x_velocity to (0)]
+[Set x_acceleration to (4)]
+[Start Simulation]
+
+[Simulation Step]
+[Change x_position by (1)]
+[If (x_velocity)(>)(15)]
+    [Set x_acceleration to (0)]
+
+[Change x_velocity by (2)]

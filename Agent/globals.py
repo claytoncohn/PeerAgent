@@ -1,13 +1,17 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 class Config:
 
     # Agent
     agent_name = os.getenv("AGENT_NAME", "Copa")
     env = os.getenv("ENV", "dev")
-    model = os.getenv("CHAT_MODEL", "gpt-4o")
+    model = os.getenv("CHAT_MODEL")
     prompt_path = os.getenv("PROMPT_PATH")
-    student = os.getenv("STUDENT", "1")
+
+    # Testing
+    group = os.getenv("GROUP", "3")
 
     # RAG
     embedding_model  = os.getenv("EMBEDDING_MODEL")
@@ -16,5 +20,5 @@ class Config:
     index_name = os.getenv("PINECONE_INDEX")
 
     # API call error handling
-    backoff_factor = os.getenv("BACKOFF_FACTOR", 0.5)
-    max_retries = os.getenv("MAX_RETRIES", 3)
+    backoff_factor = float(os.getenv("BACKOFF_FACTOR", 0.5))
+    max_retries = int(os.getenv("MAX_RETRIES", 3))

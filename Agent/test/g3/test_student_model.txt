@@ -9,4 +9,5 @@
 [If (x_velocity)(>)(15)]
     [Set x_acceleration to (0)]
 
+[Not Connected]
 [Change x_velocity by (2)]

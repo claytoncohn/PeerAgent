@@ -29,19 +29,15 @@ class Agent:
         A flag indicating whether the agent has already spoken in the current conversation.
     messages : list
         A list of dictionaries representing the conversation history.
-    domain_context : str
-        A string that stores the domain context retrieved from the RAG instance during the initial query.
     student_model : str, optional
         The student's computational model, loaded from a file, used in "dev" mode for testing.
     task_context : str, optional
         The student's task context, loaded from a file, used in "dev" mode for testing.
     """
-
     def __init__(self):
         self.RAG = RAG() 
         self.has_spoken = False
         self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
-        self.domain_context = ""
 
         if Config.env == "dev":
             self.student_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
@@ -183,9 +179,7 @@ class Agent:
         """
         Starts an interactive conversation with the user and continues until a termination command is given.
         """
-        intro_str = f"""
-        Hi, I'm {Config.agent_name}, a collaborative peer agent! Is there something I can help you with?
-        """
+        intro_str = f"Hi, I'm {Config.agent_name}, a collaborative peer agent! Is there something I can help you with?"
         intro_str_rephrase = self._get_openai_response(
             messages=
                 [

@@ -186,7 +186,7 @@ class Agent:
                     {"role": "system", "content": "Rephrase this introduction:\n"},
                     {"role": "user", "content": intro_str}
                 ],
-            temperature=0.2
+            temperature=0.5
         )
 
         stop_words = {"q", "quit", "stop", "end"}

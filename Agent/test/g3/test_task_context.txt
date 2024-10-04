@@ -1,1 +1,0 @@
-Updating Variables Under Specific Conditions, Initialization

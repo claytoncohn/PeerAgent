@@ -22,3 +22,6 @@ class Config:
     # API call error handling
     backoff_factor = float(os.getenv("BACKOFF_FACTOR", 0.5))
     max_retries = int(os.getenv("MAX_RETRIES", 3))
+
+    # GUI/Gradio
+    hf_token = os.getenv("HF_TOKEN")

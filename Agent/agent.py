@@ -1,7 +1,7 @@
 
 from RAG import RAG
 from dotenv import load_dotenv
-import sys
+import os
 from globals import Config
 import openai
 import logging
@@ -299,3 +299,4 @@ class Agent:
         # Optionally print messages in 'dev' environment once conversation ends
         if Config.env == "dev":
             self._print_messages()
+        os._exit(0)

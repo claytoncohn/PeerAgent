@@ -1,6 +1,7 @@
 
 from RAG import RAG
 from dotenv import load_dotenv
+import sys
 from globals import Config
 import openai
 import logging
@@ -223,6 +224,8 @@ class Agent:
     def talk(self):
         """
         Starts an interactive conversation with the user and continues until a termination command is given.
+
+        This function defers to `_talk_with_gui` if `use_gui` is set to `True`.
         """
         if self.use_gui:
             self._talk_with_gui()
@@ -247,12 +250,32 @@ class Agent:
 
     
     def _gui_respond(self,message, chat_history):
+        """
+        Handles the chatbot's response to a user message within the Gradio GUI.
+
+        Parameters
+        ----------
+        message : str
+            The user's input message.
+        chat_history : list of lists
+            The current chat history, where each entry is a tuple containing the user's message and the chatbot's response.
+
+        Returns
+        -------
+        str
+            An empty string to reset the message input field.
+        chat_history : list of tuples
+            The updated chat history, with the new user message and the chatbot's response appended.
+        """
         self._process_query(message)
         bot_message = self.messages[-1]["content"]
         chat_history.append((message, bot_message))
         return "",chat_history
     
     def _talk_with_gui(self):
+        """
+        Launches the Gradio GUI for interacting with the agent.
+        """
         with gr.Blocks() as demo:
             gr.Markdown("""<h1><center>Copa: A Collaborative Peer Agent for C2STEM</center></h1>""") 
             greeting = self._get_dynamic_intro_string()

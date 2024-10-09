@@ -9,6 +9,8 @@ class Config:
     env = os.getenv("ENV", "dev")
     model = os.getenv("CHAT_MODEL")
     prompt_path = os.getenv("PROMPT_PATH")
+    rag_summary_prompt_path = os.getenv("RAG_SUMMARY_PROMPT_PATH")
+    summary_few_shot_instances_path = os.getenv("SUMMARY_FEW_SHOT_INSTANCES_PATH")
 
     # Testing
     group = os.getenv("GROUP", "9")

@@ -10,7 +10,7 @@ import gradio as gr
 import json
 logging.info("Successfully imported Agent class libraries.")
 
-load_dotenv()
+load_dotenv(override=True)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -206,20 +206,22 @@ class Agent:
         - The conversation is formatted according to OpenAI's chat completion API, with roles such as 'system', 'user', and 'assistant'.
         - The method `_get_openai_response` is used to interact with the OpenAI API and retrieve the summary.
         """
-        with open(Config.summary_few_shot_instances_path, 'r') as f:
-            few_shot_instances = json.load(f) 
-
         summary_messages = [{"role": "system", "content": self._load_file(Config.rag_summary_prompt_path)}]
 
-        for instance in few_shot_instances:
-            student_query = instance["user_query"]
-            student_computational_model = instance["student_computational_model"]
-            assistat_response = instance["assistant_response"]
-            query_plus_model_string = f"User Query:\n{student_query}\n\nStudent Computational Model:\n{student_computational_model}"
-            summary_messages.append({"role": "user", "content": query_plus_model_string})
+        with open(Config.summary_few_shot_instances_path, 'r') as f:
+            few_shot_instances = json.load(f) 
+        for inst in few_shot_instances:
+            student_group = inst["student_group"]
+            student_query = inst["user_query"]
+            student_computational_model = inst["student_computational_model"]
+            assistat_response = inst["assistant_response"]
+
+            group_query_model_string = f"Student Group:\n{student_group}\n\nUser Query:\n{student_query}\n\nStudent Computational Model:\n{student_computational_model}"
+            summary_messages.append({"role": "user", "content": group_query_model_string})
             summary_messages.append({"role": "assistant", "content": assistat_response})
         
-        summary_messages.append({"role": "user", "content": user_query})
+        current_group_query_model_string = f"Student Group:\n1\n\nUser Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
+        summary_messages.append({"role": "user", "content": current_group_query_model_string})
 
         summary = self._get_openai_response(summary_messages)
         logging.info(f"Retrieved the following summary of the students' current problem in the Agent class: {summary}")

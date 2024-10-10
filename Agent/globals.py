@@ -13,7 +13,7 @@ class Config:
     summary_few_shot_instances_path = os.getenv("SUMMARY_FEW_SHOT_INSTANCES_PATH")
 
     # Testing
-    group = os.getenv("GROUP", "9")
+    group = os.getenv("GROUP")
 
     # RAG
     embedding_model  = os.getenv("EMBEDDING_MODEL")

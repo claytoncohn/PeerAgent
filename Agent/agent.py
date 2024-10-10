@@ -133,11 +133,11 @@ class Agent:
                 time.sleep(Config.backoff_factor * (2 ** i))
         return "I'm sorry, I don't think I'm understanding you correctly. Can you explain?"
         
-    def _print_messages(self):
+    def _print_messages(self,messages):
         """
         Prints the entire message history of the conversation.
         """
-        for m in self.messages:
+        for m in messages:
             print("------------------------------------------------------------------------")
             print("ROLE:", m["role"])
             print("CONTENT:", m["content"])
@@ -342,5 +342,5 @@ class Agent:
         """
         # Optionally print messages in 'dev' environment once conversation ends
         if Config.env == "dev":
-            self._print_messages()
+            self._print_messages(self.messages)
         os._exit(0)

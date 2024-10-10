@@ -10,7 +10,7 @@ import gradio as gr
 import json
 logging.info("Successfully imported Agent class libraries.")
 
-load_dotenv(override=True)
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 

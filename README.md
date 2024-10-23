@@ -11,6 +11,7 @@ This is ongoing dissertation work. The current implementation involves RAG-based
 1. Setup conda environment
 
 conda env create -f agent_env.yml
+
 conda activate C2STEM_Agent
 
 2. Run the main file

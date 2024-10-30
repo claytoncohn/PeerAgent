@@ -87,6 +87,7 @@ class RAG:
             except openai.APIError as e:
                 logging.error(f"OpenAI API error for embedding call from RAG: {e}, retry {i+1}/{Config.max_retries}")
                 time.sleep(Config.backoff_factor * (2 ** i))
+        logging.error("Failed to retrieve embeddings from OpenAI embedding model in RAG class after all retries.")
         return None
     
     def retrieve(self,embedding,k):
@@ -117,18 +118,22 @@ class RAG:
         Exception
             Raised if an unknown error occurs while querying the Pinecone index.
         """
-        for i in range(Config.max_retries):
-            try:
-                result = self.index.query(
-                    namespace=self.namespace,
-                    vector=embedding,
-                    top_k=k,
-                    include_values=False,
-                    include_metadata=True
-                )
-                logging.info(f"Successfully retrieved domain knowledge from vector store in RAG class.'")
-                return result
-            except Exception as e:
-                logging.error(f"Pinecone API error for retrieving from knowledge base in RAG class: {e}, retry {i+1}/{Config.max_retries}")
-                time.sleep(Config.backoff_factor * (2 ** i))
+        if embedding:
+            for i in range(Config.max_retries):
+                try:
+                    result = self.index.query(
+                        namespace=self.namespace,
+                        vector=embedding,
+                        top_k=k,
+                        include_values=False,
+                        include_metadata=True
+                    )
+                    logging.info(f"Successfully retrieved domain knowledge from vector store in RAG class.'")
+                    return result
+                except Exception as e:
+                    logging.error(f"Pinecone API error for retrieving from knowledge base in RAG class: {e}, retry {i+1}/{Config.max_retries}")
+                    time.sleep(Config.backoff_factor * (2 ** i))
+        else:
+            logging.error("'None' object passed to retrieve method in RAG class from embedding model.")
+        logging.error("Failed to retrieve domain knowledge from vector store in RAG class.")
         return None

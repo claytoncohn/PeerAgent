@@ -156,15 +156,37 @@ class Agent:
         None
         """
         if not self.has_spoken:
-            # First query: Perform RAG retrieval
+            # First query: Perform RAG retrieval, first summarize the user's query and computational model
             query_plus_comp_model_summary = self._get_query_plus_comp_model_summary(user_query)
-            q_embed = self.RAG.get_embeddings([query_plus_comp_model_summary])[0]
-            matches = self.RAG.retrieve(q_embed, 3)["matches"]
-            domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
+
+            # Get embeddings
+            q_embed = self.RAG.get_embeddings([query_plus_comp_model_summary])
+
+            # Handle q_embed being None
+            if q_embed is None:
+                logging.error("Failed to retrieve embeddings in Agent class, using fallback domain context.")
+                domain_context = "No domain knowledge available due to failed embedding retrieval."
+            else:
+
+                # Embedding retrieval successful
+                q_embed = q_embed[0] 
+
+                retrieval_result = self.RAG.retrieve(q_embed, 3)
+                if retrieval_result is None or "matches" not in retrieval_result or not retrieval_result["matches"]:
+                    logging.error("Failed to retrieve knowledge base matches in Agent class, using fallback domain context.")
+                    domain_context = "No domain knowledge available currently due to failed RAG retrieval."
+                else:
+
+                    # Matches retrieved successfully
+                    matches = retrieval_result["matches"]
+                    domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
+            
+            # Update messages with domain context (fallback or actual context)
             self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
     
             # Create the initial user message and student model
             user_message_str = f"Student Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
+        
         else:
             # Subsequent queries: only include the user query/response in the messages
             user_message_str = user_query
@@ -261,9 +283,7 @@ class Agent:
         bool
             `True` if the message is in the set of stop words, `False` otherwise.
         """
-        stop_words = {"q", "quit", "stop", "end"}
-        if message in stop_words:
-            return True
+        return message in {"q", "quit", "stop", "end"}
 
     def talk(self):
         """
@@ -293,7 +313,7 @@ class Agent:
         self._end_conversation()
 
     
-    def _gui_respond(self,message, chat_history):
+    def _gui_respond(self, message, chat_history):
         """
         Handles the chatbot's response to a user message within the Gradio GUI.
 
@@ -334,7 +354,7 @@ class Agent:
             end_btn = gr.Button("End Conversation")
             end_btn.click(self._end_conversation)
 
-        demo.launch(share=True)
+        demo.launch(share=True,inbrowser=True)
 
     def _end_conversation(self):
         """

@@ -1,5 +1,5 @@
 
-from RAG import RAG
+from rag import RAG
 from dotenv import load_dotenv
 import os
 from globals import Config
@@ -49,7 +49,7 @@ class Agent:
         else:
             # This will be dynamic in production, but right now will have same values as in dev
             self.student_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
-        logging.info("Successfully initialized Agent class.")
+        logging.info(f"Successfully initialized Agent class in '{Config.env}' environment.")
 
     def _load_file(self, file_path):
         """
@@ -354,7 +354,8 @@ class Agent:
             end_btn = gr.Button("End Conversation")
             end_btn.click(self._end_conversation)
 
-        demo.launch(share=True,inbrowser=True)
+        demo.launch(share=False,inbrowser=False)
+        
 
     def _end_conversation(self):
         """

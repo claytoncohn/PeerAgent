@@ -1,5 +1,5 @@
 
-from rag import RAG
+from RAG import RAG
 from dotenv import load_dotenv
 import os
 from globals import Config

@@ -32,7 +32,6 @@ async def initialize_agent_server():
     Exception
         If an error occurs while sending the URL or initializing the agent server.
     """
-    # THIS NEEDS TO BE INTEGRATED ASYNCHRONOUSLY
     agent.talk()
 
 
@@ -45,7 +44,7 @@ async def handler(websocket):
     1. Establishes a new connection and assigns it to the `user_state`.
     2. Sends chat window URL to the client.
     3. Initializes the agent server for the connection.
-    3. Processes incoming messages, which may include actions, user state updates, 
+    4. Processes incoming messages, which may include actions, user state updates, 
        or other types, and appropriately updates the `user_state`.
 
     Parameters
@@ -107,7 +106,28 @@ async def handler(websocket):
 
 def run_websocket_server():
     """
-    This is the function to run websockets on different thread.
+    Starts and runs a WebSocket server on a separate thread.
+
+    This function initializes and starts a WebSocket server that listens 
+    on `ws://localhost:8080` using Python's `websockets` library. 
+    The server runs indefinitely until a `KeyboardInterrupt` is received, 
+    which gracefully shuts it down.
+
+    The function uses an asyncio event loop to manage the asynchronous 
+    WebSocket server and runs it indefinitely.
+
+    Notes
+    -----
+    - The WebSocket server is designed to run on `ws://localhost:8080`.
+    - The `handler` function should be defined elsewhere to process incoming 
+      WebSocket connections.
+    - Proper logging is used to record server startup and shutdown events.
+
+    Raises
+    ------
+    KeyboardInterrupt
+        If the server is interrupted manually, it shuts down gracefully.
+
     """
     async def websocket_server():
         logging.info("Starting WebSocket server on ws://localhost:8080")
@@ -124,7 +144,6 @@ def run_websocket_server():
 
 async def main():
     """
-
     This function creates and starts a WebSocket server that listens on
     `ws://localhost:8080` for incoming connections. It runs until manually
     terminated or interrupted.

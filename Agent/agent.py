@@ -361,7 +361,5 @@ class Agent:
         """
         Terminates the conversation and handles any cleanup tasks.
         """
-        # Optionally print messages in 'dev' environment once conversation ends
-        if Config.env == "dev":
-            self._print_messages(self.messages)
+        self._print_messages(self.messages)
         os._exit(0)

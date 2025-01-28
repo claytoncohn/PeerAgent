@@ -1,5 +1,6 @@
 
 from rag import RAG
+from ksanalyzer import KSAnalyzer
 from dotenv import load_dotenv
 import os
 from globals import Config
@@ -40,7 +41,8 @@ class Agent:
     """
     def __init__(self,use_gui=False):
         self.use_gui = use_gui
-        self.RAG = RAG() 
+        self.RAG = RAG()
+        self.knowledge_analyzer = KSAnalyzer()
         self.has_spoken = False
         self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
 
@@ -248,6 +250,18 @@ class Agent:
         summary = self._get_openai_response(summary_messages)
         logging.info(f"Retrieved the following summary of the students' current problem in the Agent class: {summary}")
         return summary
+
+    def analyze_knowledge(self):
+        """
+        Calls KSAnalyzer to analyze messages and update the knowledge state.
+        """
+        self.ks_analyzer.analyze_messages(self.messages, self._get_openai_response)
+
+    def get_knowledge_state(self):
+        """
+        Retrieves the current knowledge state from KSAnalyzer.
+        """
+        return self.ks_analyzer.get_knowledge_state()
        
     def _get_dynamic_intro_string(self):
         """

@@ -1,6 +1,5 @@
-
 from rag import RAG
-from ksanalyzer import KSAnalyzer
+from Agent.xai_module import XAI_module
 from dotenv import load_dotenv
 import os
 from globals import Config
@@ -42,7 +41,7 @@ class Agent:
     def __init__(self,use_gui=False):
         self.use_gui = use_gui
         self.RAG = RAG()
-        self.knowledge_analyzer = KSAnalyzer()
+        self.xai_module = XAI_module()
         self.has_spoken = False
         self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
 

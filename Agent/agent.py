@@ -1,6 +1,5 @@
-
+from c2stem_state import C2STEMState
 from rag import RAG
-from dotenv import load_dotenv
 import os
 from globals import Config
 import openai
@@ -8,48 +7,94 @@ import logging
 import time
 import gradio as gr
 import json
-logging.info("Successfully imported Agent class libraries.")
-
+import time
+from dotenv import load_dotenv
 load_dotenv()
 
+epoch_time = str(time.time()).split(".")[0]
+
+logging.info("Successfully imported Agent class libraries.")
 logging.basicConfig(level=logging.INFO)
 
 class Agent:
     """
-    A collaborative "knowledgeable peer" agent that interacts with users using RAG (Retrieval Augmented Generation)
+    A collaborative "knowledgeable peer" agent that interacts with users using Retrieval-Augmented Generation (RAG) 
     and OpenAI's chat completions API.
 
-    The Agent class is responsible for:
-    - Managing conversation flow.
-    - Loading system prompts and student models based on the environment.
-    - Retrieving domain knowledge using a RAG instance and augmenting user queries with log-based summaries of student difficulties.
-    - Communicating with OpenAI's API to generate conversational responses.
+    The `Agent` class is responsible for managing the conversation flow, retrieving relevant domain knowledge, 
+    augmenting user queries with context, and generating responses using OpenAI's API. It facilitates interaction 
+    between users and a knowledge-based assistant designed to support learning and problem-solving.
 
     Attributes
     ----------
     use_gui : bool
-        A flag indicating whether the agent should use a GUI for interaction.
+        A flag indicating whether the agent should use a graphical user interface (GUI) for interaction.
     RAG : RAG
-        An instance of the RAG class for handling retrieval-augmented generation for domain knowledge.
+        An instance of the `RAG` class responsible for retrieval-augmented generation, enabling domain knowledge retrieval.
     has_spoken : bool
         A flag indicating whether the agent has already spoken in the current conversation.
-    messages : list
-        A list of dictionaries representing the conversation history.
-    student_model : str, optional
-        The student's computational model, loaded from a file, used in "dev" mode for testing.
+    messages : list of dict
+        A list containing dictionaries representing the conversation history. Each message has a "role" (e.g., 
+        "system", "user", "assistant") and a "content" field.
+    student_model : str
+        A string representing the student's computational model, which is loaded from a file in development mode.
+    running_word_count : int
+        The total number of words in the conversation history, used for monitoring token usage.
+    message_truncation_count : int
+        The number of times messages have been truncated to stay within token limits.
+
+    Methods
+    -------
+    __init__(use_gui=False)
+        Initializes the agent, loads system prompts, and sets up conversation management.
+    _load_file(file_path)
+        Loads the contents of a file into a string.
+    _save_messages()
+        Saves the conversation history to a file in JSON format.
+    _get_openai_response(messages, temperature=0.0)
+        Calls OpenAI's API to generate a response based on the provided conversation history.
+    _print_messages(i=0)
+        Prints the stored conversation messages along with metadata.
+    _process_query(user_query)
+        Processes a user query, retrieves domain knowledge if needed, and generates a response.
+    _get_query_plus_comp_model_summary(user_query)
+        Generates a summary of the user's query combined with their computational model for improved RAG retrieval.
+    _get_dynamic_intro_string()
+        Generates a dynamically rephrased introduction for the agent.
+    _is_message_in_stop_words(message)
+        Checks if a given message is in a predefined set of stop words.
+    talk()
+        Starts an interactive conversation with the user, processing queries until a termination command is given.
+    _gui_respond(message, chat_history)
+        Handles chatbot responses within the Gradio GUI.
+    _talk_with_gui()
+        Launches the Gradio-based GUI for user interaction.
+    _end_conversation()
+        Ends the conversation and handles cleanup tasks.
+
+    Notes
+    -----
+    - The agent operates in either a development mode (loading a predefined student model) or a production mode.
+    - The retrieval-augmented generation (RAG) component helps retrieve domain knowledge relevant to the user's query.
+    - Conversation truncation is applied when the token limit is exceeded.
+    - The agent supports both terminal-based and GUI-based interactions.
     """
+
     def __init__(self,use_gui=False):
         self.use_gui = use_gui
         self.RAG = RAG() 
         self.has_spoken = False
         self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
 
+        self.running_word_count = len(self.messages[0]["content"].split())
+
         if Config.env == "dev":
             self.student_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
         else:
-            # This will be dynamic in production, but right now will have same values as in dev
-            self.student_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
+            self.student_model = ""
         logging.info(f"Successfully initialized Agent class in '{Config.env}' environment.")
+
+        self.message_truncation_count = 0
 
     def _load_file(self, file_path):
         """
@@ -72,6 +117,40 @@ class Agent:
         except (FileNotFoundError, IOError) as e:
             logging.error(f"Error loading file from Agent class: '{file_path}': {e}")
             return ""
+        
+    def _save_messages(self):
+        """
+        Save the conversation messages to a file in JSON format.
+
+        This method attempts to write the `messages` attribute to a file specified 
+        by `convo_save_path` in JSON format with an indentation of 4 spaces. 
+        If successful, it logs a confirmation message; otherwise, it logs an error.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        - This method logs a success message upon successful saving.
+        - If an error occurs during file writing, it logs an error message.
+
+        Raises
+        ------
+        Exception
+            If an error occurs while writing to the file.
+        """
+        try:
+            save_path = Config.convo_save_path+"_"+epoch_time+".json"
+            with open(save_path, 'w') as f:
+                json.dump(self.messages, f, indent=4)
+                logging.info(f"Successfully saved conversation from Agent class to: '{save_path}'")
+        except Exception as e:
+            logging.error(f"Error saving conversation from Agent class to: '{save_path}': {e}")
 
     def _get_openai_response(self, messages, temperature=0.0):
         """
@@ -133,27 +212,71 @@ class Agent:
                 time.sleep(Config.backoff_factor * (2 ** i))
         return "I'm sorry, I don't think I'm understanding you correctly. Can you explain?"
         
-    def _print_messages(self,messages):
+    def _print_messages(self,i=0):
         """
-        Prints the entire message history of the conversation.
-        """
-        for m in messages:
-            print("------------------------------------------------------------------------")
-            print("ROLE:", m["role"])
-            print("CONTENT:", m["content"])
+        Print the stored messages along with their roles and content.
 
-    def _process_query(self, user_query):
-        """
-        Processes user input and updates conversation messages.
+        This method prints a formatted view of the conversation history, including the role of each message 
+        (e.g., "system", "user", "assistant") and its content. It also displays summary statistics, such as 
+        the total number of messages, the total word count, and the number of times messages have been truncated 
+        due to token limitations.
 
         Parameters
         ----------
-        user_query : str
-            The input from the user.
+        i : int, optional
+            The number of recent messages to display. If `i=0`, all messages are printed. Defaults to 0.
 
         Returns
         -------
         None
+            This function only prints the messages and does not return a value.
+
+        Notes
+        -----
+        - Messages are printed with a visual separator for clarity.
+        - If `i` is greater than 0, only the last `i` messages are displayed.
+        - The function displays conversation metadata such as the total message count, word count, and truncation count.
+        - The total running word count helps monitor token usage in the conversation.
+        """
+       
+        print("\n\n***************************************************************************")
+        for m in self.messages[-i:]:
+            print("------------------------------------------------------------------------")
+            print("ROLE:", m["role"])
+            print("CONTENT:", m["content"])
+        print("------------------------------------------------------------------------")
+        print(f"Total messages in list: {len(self.messages)}")
+        print(f"Total word count for all messages: {self.running_word_count}")
+        print(f"Truncation count: {self.message_truncation_count}")
+        print("***************************************************************************\n\n")
+
+    def _process_query(self, user_query):
+        """
+        Processes a user query, retrieves relevant domain knowledge, interacts with OpenAI's API, and updates the conversation.
+
+        This method determines whether it's the first query in the conversation. If so, it retrieves domain knowledge
+        using a retrieval-augmented generation (RAG) approach and appends relevant context to the system message.
+        It then sends the conversation history to OpenAI's chat completion API, retrieves the response, and appends it 
+        to the conversation.
+
+        Parameters
+        ----------
+        user_query : str
+            The user's input query to process.
+
+        Returns
+        -------
+        None
+            This method updates the internal conversation state but does not return a value.
+
+        Notes
+        -----
+        - For the first query, the method retrieves domain knowledge using RAG and appends it to the system message.
+        - For subsequent queries, only the user query and student model are included in the conversation history.
+        - If the token count exceeds `Config.word_threshold`, older messages are truncated to fit within the model's limits.
+        - Messages are logged and saved after processing.
+        - The conversation history is maintained in `self.messages`, where each entry is a dictionary with keys "role" and "content".
+        - The method sets `self.has_spoken` to `True` after the first query to indicate that the agent has responded.
         """
         if not self.has_spoken:
             # First query: Perform RAG retrieval, first summarize the user's query and computational model
@@ -185,19 +308,48 @@ class Agent:
             self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
     
             # Create the initial user message and student model
-            user_message_str = f"Student Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
+            user_message_str = f"Student Query:\n{user_query}\n\n[CURRENT STUDENT MODEL]:\n{self.student_model}"
         
         else:
-            # Subsequent queries: only include the user query/response in the messages
+            # Subsequent queries: only include the user query/response in the messages + computational model
             user_message_str = user_query
+            user_message_str += f"\n\n[CURRENT STUDENT MODEL]:\n{self.student_model}"
         
         self.messages.append({"role": "user", "content": user_message_str})
 
-        # Get and print assistant response
-        response_text = self._get_openai_response(self.messages)
+        # Truncate messages if approaching token threshold for the model
+        truncated_messages = [self.messages[0]]+self.messages[1+self.message_truncation_count:]
+
+        # # To test truncation
+        # if len(truncated_messages)!=len(self.messages):
+        #     print("\n\n***************************************************************************")
+        #     for m in [self.messages[0]]+self.messages[1+self.message_truncation_count:]:
+        #         print("------------------------------------------------------------------------")
+        #         print("ROLE:", m["role"])
+        #         print("CONTENT:", m["content"])
+        #     print("------------------------------------------------------------------------")
+        #     print(f"Total messages in list: {len(self.messages)}")
+        #     print(f"Total word count for all messages: {self.running_word_count}")
+        #     print(f"Truncation count: {self.message_truncation_count}")
+        #     print("***************************************************************************\n\n")
+
+        response_text = self._get_openai_response(truncated_messages)
         if not self.use_gui: 
             print(f"\n{Config.agent_name}: {response_text}\n")
         self.messages.append({"role": "assistant", "content": response_text})
+
+        self.running_word_count += \
+            len(self.messages[-2]["content"].split()) + \
+            len(self.messages[-1]["content"].split())
+        
+        if self.running_word_count > Config.word_threshold:
+            self.message_truncation_count += 2
+
+            # To test truncation
+            # print(f"TRUNCATED NOW {self.message_truncation_count}")
+
+        self._print_messages(2)
+        self._save_messages()
 
         # Set flag to indicate that the agent has spoken
         if not self.has_spoken:
@@ -238,11 +390,11 @@ class Agent:
             student_computational_model = inst["student_computational_model"]
             assistat_response = inst["assistant_response"]
 
-            group_query_model_string = f"Student Group:\n{student_group}\n\nUser Query:\n{student_query}\n\nStudent Computational Model:\n{student_computational_model}"
+            group_query_model_string = f"Student Group:\n{student_group}\n\Student Query:\n{student_query}\n\nStudent Computational Model:\n{student_computational_model}"
             summary_messages.append({"role": "user", "content": group_query_model_string})
             summary_messages.append({"role": "assistant", "content": assistat_response})
         
-        current_group_query_model_string = f"Student Group:\n1\n\nUser Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
+        current_group_query_model_string = f"Student Group:\n1\n\Student Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
         summary_messages.append({"role": "user", "content": current_group_query_model_string})
 
         summary = self._get_openai_response(summary_messages)
@@ -283,7 +435,8 @@ class Agent:
         bool
             `True` if the message is in the set of stop words, `False` otherwise.
         """
-        return message in {"q", "quit", "stop", "end"}
+        return message in {}
+        # return message in {"q", "quit", "stop", "end"}
 
     def talk(self):
         """
@@ -299,9 +452,9 @@ class Agent:
         
         user_query = input(f"\n{Config.agent_name}: "+intro_str+"\n\n"+"Student: ").lower()
 
-        if self._is_message_in_stop_words(user_query):
-            self._end_conversation()
-            return
+        # if self._is_message_in_stop_words(user_query):
+        #     self._end_conversation()
+        #     return
 
         # Process the first query
         self._process_query(user_query)
@@ -310,8 +463,7 @@ class Agent:
         while not self._is_message_in_stop_words((new_query := input("Student: ").lower())):
             self._process_query(new_query)
 
-        self._end_conversation()
-
+        # self._end_conversation()
     
     def _gui_respond(self, message, chat_history):
         """
@@ -351,15 +503,14 @@ class Agent:
             send_btn = gr.Button("Send")
             send_btn.click(self._gui_respond, inputs=[msg, chatbot], outputs=[msg, chatbot])
 
-            end_btn = gr.Button("End Conversation")
-            end_btn.click(self._end_conversation)
+            # end_btn = gr.Button("End Conversation")
+            # end_btn.click(self._end_conversation)
 
         demo.launch(share=False,inbrowser=False)
-        
-
+    
     def _end_conversation(self):
         """
         Terminates the conversation and handles any cleanup tasks.
         """
-        self._print_messages(self.messages)
+        self._print_messages()
         os._exit(0)

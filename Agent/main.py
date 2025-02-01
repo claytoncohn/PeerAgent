@@ -85,13 +85,15 @@ async def handler(websocket):
 
                 # Process C2STEM physics actions
                 if message['type'] == "action":
-                    computational_model_state.add_actions(str(message['data']))
-                    logging.info(f"Action added: {message['data']}")
+                    pass # Not using actions yet
+                    # computational_model_state.add_actions(str(message['data']))
+                    # logging.info(f"Action added: {message['data']}")
 
                 # Update the user model
                 elif message['type'] == "state":
                     computational_model_state.set_user_model(str(message['data']))
-                    logging.info(f"User model updated: {message['data']}")
+                    agent.student_model = computational_model_state.user_model
+                    logging.info(f"User model updated: {agent.student_model}")
                     
                 else:
                     await websocket.send(message['data'])

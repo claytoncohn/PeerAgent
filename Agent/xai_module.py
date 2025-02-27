@@ -50,7 +50,6 @@ class XAI_module:
                     "Using internal chain-of-thought reasoning, determine all essential educational concepts that a student must understand to solve the problem. "
                     "Output ONLY a valid JSON with exactly two keys: 'reasoning' (string) and 'concepts' (a list of strings). "
                     "Ensure that your output contains no extraneous text and is safe and appropriate for a K-12 educational environment. "
-                    "You can assume that the concepts are single words or short phrases."
                     "You can also assume that the students are beginners in the subject area and need to learn the basic concepts to solve the problem."
                     ""
                 )
@@ -85,7 +84,7 @@ class XAI_module:
         try:
             result = json.loads(response_text)
             self.concepts = result.get("concepts", [])
-            self.knowledge_state = result.get("knowledge_state", {})
+            self.knowledge_state = {concept: 0 for concept in self.concepts}
         except json.JSONDecodeError as e:
             logging.error(f"Failed to parse JSON from OpenAI response in _analyze_problem: {e}\nResponse Text: {response_text}")
 
@@ -115,8 +114,9 @@ class XAI_module:
                 "content": (
                     "You are an educational assistant with expertise in analyzing student interactions in a K-12 setting. "
                     "Your task is to review the conversation history and the student's previous knowledge state. "
+                    "The summary works like a 'teacher's note' to track the student's status in natural language. "
                     "Use chain-of-thought reasoning to update the summary and update the student's knowledge state based on the dialogue. "
-                    "Output ONLY a valid JSON with exactly two keys: 'summary' (a concise string summary) and 'knowledge_state'."
+                    "Output ONLY a valid JSON with exactly two keys: 'summary' and 'knowledge_state'."
                     "Ensure your output is safe and appropriate for an educational context."
                 )
             },
@@ -167,6 +167,15 @@ class XAI_module:
             dict: The latest knowledge state in a JSON-friendly format.
         """
         return self.knowledge_state
+
+    def get_summary(self):
+        """
+        Returns the current summary of the student's knowledge state.
+
+        Returns:
+            str: The summary string.
+        """
+        return self.summary
 
 
     def suggest_explanations(self, messages, get_openai_response):
@@ -222,8 +231,12 @@ class XAI_module:
                     
                     Specifically, follow these steps:
                     1. Find concepts that are marked as zero in the knowledge state. They are the concepts the student doesn't know.
-                    2. For each concept, think step-by-step how to explain it to the student using all the information available.
-                    3. Provide a JSON response with 'reasoning' and 'explanations' keys.
+                    2. For each of those concepts, think step-by-step how to explain each to the student using all the information available. Output your thought process on the "reasoning" part of JSON.
+                    2-1. Also, consider the background of the student and the conversation history to provide relevant and understandable explanations.
+                    2-2. If no background information is available, assume that the student is a 10th grader.
+                    2-3. Make sure to only include concepts that are marked as unknown (0) in the knowledge state! No more, no less.
+                    3. Once you are done, provide a dictionary of concepts and explanations in the "explanations" part of JSON.
+                    4. Provide a JSON response with 'reasoning' and 'explanations' keys.
                     
                     Your response must be in valid JSON format, following this exact structure:
                     {{  
@@ -243,7 +256,8 @@ class XAI_module:
         try:
             result = json.loads(response_text)
             explanations = result.get("explanations", [])
-            return explanations
+            reasoning = result.get("reasoning", "")
+            return explanations, reasoning
         except json.JSONDecodeError as e:
             logging.error(f"Failed to parse JSON from OpenAI response in suggest_explanations: {e}\nResponse Text: {response_text}")
             return []

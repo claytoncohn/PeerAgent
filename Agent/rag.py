@@ -129,6 +129,8 @@ class RAG:
                         include_metadata=True
                     )
                     logging.info(f"Successfully retrieved domain knowledge from vector store in RAG class.'")
+                    retrieved_info = '\n\n'.join([m["metadata"]["text"] for m in result["matches"]])
+                    print(f"\n\nRetrieved the following information from RAG store:\n{retrieved_info}\n\n")
                     return result
                 except Exception as e:
                     logging.error(f"Pinecone API error for retrieving from knowledge base in RAG class: {e}, retry {i+1}/{Config.max_retries}")

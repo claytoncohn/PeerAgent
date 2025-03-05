@@ -398,7 +398,7 @@ class Agent:
         summary_messages.append({"role": "user", "content": current_group_query_model_string})
 
         summary = self._get_openai_response(summary_messages)
-        logging.info(f"Retrieved the following summary of the students' current problem in the Agent class: {summary}")
+        logging.info(f"\n\nRetrieved the following summary of the students' current problem in the Agent class: {summary}\n\n")
         return summary
        
     def _get_dynamic_intro_string(self):

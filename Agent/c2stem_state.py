@@ -3,7 +3,7 @@ class C2STEMState:
     Manages the state for the agent server.
 
     This class provides functionality to maintain and update the state 
-    of the server, including actions, user models, and WebSocket connections.
+    of the server, including actions, user model, and WebSocket connections.
     It acts as a central repository for managing client interactions and 
     their respective states.
     """
@@ -15,15 +15,12 @@ class C2STEMState:
         ----------
         actions : list of str
             A list to store actions received from the client.
-        prev_model : str
-            The previous user model, allowing for state comparisons.
         user_model : str
             The current user model received from the client.
         socket : object
             The WebSocket connection associated with the client.
         """
         self.actions = []
-        self.prev_model = ""
         self.user_model = ""
         self.socket = ''
 

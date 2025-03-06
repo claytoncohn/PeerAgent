@@ -1,4 +1,4 @@
-from c2stem_state import C2STEMState
+from learner_model import LearnerModel
 from rag import RAG
 import os
 from globals import Config
@@ -36,8 +36,8 @@ class Agent:
     messages : list of dict
         A list containing dictionaries representing the conversation history. Each message has a "role" (e.g., 
         "system", "user", "assistant") and a "content" field.
-    student_model : str
-        A string representing the student's computational model, which is loaded from a file in development mode.
+    learner_model : str
+        Students' learner model, used for guiding agent interactions.
     running_word_count : int
         The total number of words in the conversation history, used for monitoring token usage.
     message_truncation_count : int
@@ -88,10 +88,12 @@ class Agent:
 
         self.running_word_count = len(self.messages[0]["content"].split())
 
+        self.learner_model = LearnerModel()
+
         if Config.env == "dev":
-            self.student_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
+            self.learner_model.user_model = self._load_file(f'test/g{Config.group}/test_student_model.txt')
         else:
-            self.student_model = ""
+            self.learner_model.user_model = ""
         logging.info(f"Successfully initialized Agent class in '{Config.env}' environment.")
 
         self.message_truncation_count = 0
@@ -308,12 +310,12 @@ class Agent:
             self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
     
             # Create the initial user message and student model
-            user_message_str = f"Student Query:\n{user_query}\n\n[CURRENT STUDENT MODEL]:\n{self.student_model}"
+            user_message_str = f"Student Query:\n{user_query}\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
         
         else:
             # Subsequent queries: only include the user query/response in the messages + computational model
             user_message_str = user_query
-            user_message_str += f"\n\n[CURRENT STUDENT MODEL]:\n{self.student_model}"
+            user_message_str += f"\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
         
         self.messages.append({"role": "user", "content": user_message_str})
 
@@ -394,7 +396,7 @@ class Agent:
             summary_messages.append({"role": "user", "content": group_query_model_string})
             summary_messages.append({"role": "assistant", "content": assistat_response})
         
-        current_group_query_model_string = f"Student Group:\n1\n\Student Query:\n{user_query}\n\nStudent Computational Model:\n{self.student_model}"
+        current_group_query_model_string = f"Student Group:\n1\n\Student Query:\n{user_query}\n\nStudent Computational Model:\n{self.learner_model.user_model}"
         summary_messages.append({"role": "user", "content": current_group_query_model_string})
 
         summary = self._get_openai_response(summary_messages)

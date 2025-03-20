@@ -4,6 +4,8 @@ import os
 from globals import Config
 import openai
 import logging
+import datetime
+import pytz
 import time
 import gradio as gr
 import json
@@ -47,6 +49,8 @@ class Agent:
     -------
     __init__(use_gui=False)
         Initializes the agent, loads system prompts, and sets up conversation management.
+    _get_formatted_time()
+        Returns the current time formatted as a string in the 'America/Chicago' timezone.
     _load_file(file_path)
         Loads the contents of a file into a string.
     _save_messages()
@@ -84,8 +88,9 @@ class Agent:
         self.use_gui = use_gui
         self.RAG = RAG() 
         self.has_spoken = False
-        self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
 
+        self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
+        self.message_timestamps = [self._get_formatted_time()]
         self.running_word_count = len(self.messages[0]["content"].split())
 
         self.learner_model = LearnerModel()
@@ -97,6 +102,25 @@ class Agent:
         logging.info(f"Successfully initialized Agent class in '{Config.env}' environment.")
 
         self.message_truncation_count = 0
+
+    def _get_formatted_time(self):
+        """
+        Get the current time formatted as a string in Central Time (CT) with timezone details.
+
+        The function retrieves the current UTC time, converts it to Central Time
+        (America/Chicago), and formats it in the following format:
+        'YYYY-MM-DD HH:MM:SS TZ±HHMM'.
+
+        Returns
+        -------
+        str
+            The formatted current time in Central Time with timezone information.
+        """
+        utc_now = datetime.datetime.now(pytz.utc)
+        central_tz = pytz.timezone('America/Chicago')
+        central_now = utc_now.astimezone(central_tz)
+        formatted_time = central_now.strftime('%Y-%m-%d %H:%M:%S %Z%z')
+        return formatted_time
 
     def _load_file(self, file_path):
         """
@@ -148,6 +172,14 @@ class Agent:
         """
         try:
             save_path = Config.convo_save_path+"_"+epoch_time+".json"
+
+            # Merge messages sent/received to/from OpenAI w/ timestamps
+            save_messages = []
+            for i in range(len(self.messages)):
+                m = self.messages[i]
+                m["timestamp"] = self.message_timestamps[i]
+                save_messages.append(m)
+
             with open(save_path, 'w') as f:
                 json.dump(self.messages, f, indent=4)
                 logging.info(f"Successfully saved conversation from Agent class to: '{save_path}'")
@@ -305,6 +337,20 @@ class Agent:
                     # Matches retrieved successfully
                     matches = retrieval_result["matches"]
                     domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
+
+            # Save retrieved domain knowledge
+            rag_retrieval_save_path = Config.retrieved_domain_knowledge_save_path+"_"+epoch_time+".txt"
+            try:
+                with open(rag_retrieval_save_path, "a") as f:
+                    domain_knowledge_dict = {
+                        "timestamp": self._get_formatted_time(),
+                        "query_logs_summary": query_plus_comp_model_summary,
+                        "domain_knowledge_retrieved": domain_context,
+                    }
+                    json.dump(domain_knowledge_dict, f, indent=4)
+                    logging.info(f"Saved retrieved domain knowledge in Agent class to: '{rag_retrieval_save_path}'")
+            except Exception as e:
+                logging.error(f"Error saving retrieved domain knowledge in Agent class to: '{rag_retrieval_save_path}': {e}")
             
             # Update messages with domain context (fallback or actual context)
             self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
@@ -318,6 +364,7 @@ class Agent:
             user_message_str += f"\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
         
         self.messages.append({"role": "user", "content": user_message_str})
+        self.message_timestamps.append(self._get_formatted_time())
 
         # Truncate messages if approaching token threshold for the model
         truncated_messages = [self.messages[0]]+self.messages[1+self.message_truncation_count:]
@@ -339,6 +386,7 @@ class Agent:
         if not self.use_gui: 
             print(f"\n{Config.agent_name}: {response_text}\n")
         self.messages.append({"role": "assistant", "content": response_text})
+        self.message_timestamps.append(self._get_formatted_time())
 
         self.running_word_count += \
             len(self.messages[-2]["content"].split()) + \

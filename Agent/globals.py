@@ -13,6 +13,7 @@ class Config:
     summary_few_shot_instances_path = os.getenv("SUMMARY_FEW_SHOT_INSTANCES_PATH")
     convo_save_path = os.getenv("CONVO_SAVE_PATH")
     word_threshold = int(os.getenv("MODEL_WORD_THRESHOLD"))
+    retrieved_domain_knowledge_save_path = os.getenv("RETRIEVED_DOMAIN_KNOWLEDGE_SAVE_PATH")
 
     # Testing
     group = os.getenv("GROUP")

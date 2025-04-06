@@ -85,6 +85,9 @@ class Agent:
     """
 
     def __init__(self,use_gui=False):
+        # Currently hard-coded but will need to be dynamic
+        self.group = 0
+
         self.use_gui = use_gui
         self.RAG = RAG() 
         self.has_spoken = False
@@ -171,7 +174,7 @@ class Agent:
             If an error occurs while writing to the file.
         """
         try:
-            save_path = Config.convo_save_path+"_"+epoch_time+".json"
+            save_path = Config.convo_save_path+"/"+Config.c2stem_task+"_Group"+str(self.group)+"_"+epoch_time+"_CONVO.json"
 
             # Merge messages sent/received to/from OpenAI w/ timestamps
             save_messages = []
@@ -339,7 +342,8 @@ class Agent:
                     domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
 
             # Save retrieved domain knowledge
-            rag_retrieval_save_path = Config.retrieved_domain_knowledge_save_path+"_"+epoch_time+".txt"
+            rag_retrieval_save_path = Config.retrieved_domain_knowledge_save_path+Config.c2stem_task+"_Group"+str(self.group)+"_"+epoch_time+"_RAG.json"
+
             try:
                 with open(rag_retrieval_save_path, "a") as f:
                     domain_knowledge_dict = {

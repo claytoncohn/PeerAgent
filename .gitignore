@@ -1,0 +1,5 @@
+.env
+.idea
+Agent/prompts/
+Agent/test/
+Agent/__pycache__/

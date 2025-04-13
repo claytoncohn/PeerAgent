@@ -1,42 +1,70 @@
-from agent import Agent
+
+import json
+from typing import Dict
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException, Body
+from fastapi.middleware.cors import CORSMiddleware
+from agent import Agent  # Ensure agent.py is in the same folder
+import uvicorn
 from globals import Config
 import asyncio
-import websockets
+# import websockets
 import json
 from c2stem_state import C2STEMState
 import logging
 import threading
+import asyncio
+import gradio.queueing as queueing
 
-"""
-This is the entry file to the agent server implementation. 
-The python file sets up the websocket connection and the user state for maintenance.
-The file sends the chat window url on initialization to the front end.
-The file listens to the messages on websocket and saves them to userState.
-"""
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change as needed
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# user_agents: Dict[str, Agent] = {}
 
 #  Global variables and data structure
 chat_window_URL = "URL= http://127.0.0.1:7860",
 computational_model_state = C2STEMState()
 agent = Agent(use_gui=True)
 
+original_init = queueing.Queue.__init__
 
-async def initialize_agent_server():
-    """
-    Initializes the agent server.
+def new_init(self, *args, **kwargs):
+    original_init(self, *args, **kwargs)
+    # Replace the pending_message_lock with an asyncio.Lock if it isn’t already one.
+    self.pending_message_lock = asyncio.Lock()
+    self.delete_lock = asyncio.Lock()
 
-    This function initializes the WebSocket connection for the agent server. 
-    It invokes the agent's talk` method. It also handles exceptions during initialization.
+queueing.Queue.__init__ = new_init
 
-    Raises
-    ------
-    Exception
-        If an error occurs while sending the URL or initializing the agent server.
-    """
+def launch_agent():
+    # This will call the built-in GUI (agent.talk) from agent.py.
+    # Because _talk_with_gui now launches in non-blocking mode, this thread will finish
+    # quickly after launching the Gradio server.
     agent.talk()
 
 
-# Message handler for incoming message over the WebSocket.
-async def handler(websocket):
+# Launch the GUI Agent on startup in a separate thread.
+@app.on_event("startup")
+async def startup_event():
+    threading.Thread(target=launch_agent, daemon=True).start()
+
+
+@app.post("/api/login")
+async def login(username: str = Body(...), password: str = Body(...)):
+    # Dummy authentication.
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Username and password required")
+    # In production, validate against your MongoDB users store.
+    return {"success": True, "username": username}
+
+@app.websocket("/ws/data")
+async def handler(websocket: WebSocket):
     """
     Handles incoming WebSocket messages and maintains the user state.
 
@@ -44,7 +72,7 @@ async def handler(websocket):
     1. Establishes a new connection and assigns it to the `user_state`.
     2. Sends chat window URL to the client.
     3. Initializes the agent server for the connection.
-    4. Processes incoming messages, which may include actions, user state updates, 
+    4. Processes incoming messages, which may include actions, user state updates,
        or other types, and appropriately updates the `user_state`.
 
     Parameters
@@ -62,30 +90,39 @@ async def handler(websocket):
     Notes
     -----
     - Incoming messages are expected to be JSON formatted.
-    - Recognized message types are "action" and "state". Unrecognized types are 
+    - Recognized message types are "action" and "state". Unrecognized types are
       returned back to the sender.
     - Invalid JSON messages are handled gracefully, returning an error response.
     """
+    # if username not in user_agents:
+    #     # Create a new Agent instance without launching the Gradio GUI.
+    #     user_agents[username] = Agent(use_gui=False)
+    # agent = user_agents[username]
+    # agent.talk()
     try:
         # Assigning websocket to user state to be used globally.
         computational_model_state.set_socket(websocket)
         global chat_window_URL
+        await websocket.accept()
         try:
             # Hardcoded chat_window_URL to http://127.0.0.1:7860, as this is Gradio default
-            await websocket.send(chat_window_URL)
+            await websocket.send_text(chat_window_URL)
             logging.info("Chat window URL sent to client.")
         except Exception as e:
             logging.error(f"Error initializing agent server: {e}")
         logging.info("New Websocket connection established")
 
-        async for message in websocket:
-            try:
+        # async for message in websocket:
+        try:
+            while True:
                 # Parse the incoming message
-                message = json.loads(message)
-
+                # message = json.loads(message)
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                # user_message = data_json.get("message", "").strip()
                 # Process C2STEM physics actions
                 if message['type'] == "action":
-                    pass # Not using actions yet
+                    pass  # Not using actions yet
                     # computational_model_state.add_actions(str(message['data']))
                     # logging.info(f"Action added: {message['data']}")
 
@@ -94,101 +131,26 @@ async def handler(websocket):
                     computational_model_state.set_user_model(str(message['data']))
                     agent.learner_model.user_model = computational_model_state.user_model
                     logging.info(f"User model updated: {agent.learner_model.user_model}")
-                    
+
                 else:
-                    await websocket.send(message['data'])
-            except json.JSONDecoderError:
-                await websocket.send(json.dumps({"type": "error", "data": "Invalid JSON format."}))
-                logging.error("Invalid message type received")
-    except websockets.exceptions.ConnectionClosed as e:
-        logging.error(f"WebSocket connection closed: {e}")
+                    await websocket.send_text(message['data'])
+        except json.JSONDecoderError:
+            await websocket.send_text(json.dumps({"type": "error", "data": "Invalid JSON format."}))
+            logging.error("Invalid message type received")
+    except WebSocketDisconnect:
+        print("User disconnected from chat.")
     except Exception as e:
         logging.error(f"Error in handler: {e}")
 
 
-def run_websocket_server():
-    """
-    Starts and runs a WebSocket server on a separate thread.
-
-    This function initializes and starts a WebSocket server that listens 
-    on `ws://localhost:8080` using Python's `websockets` library. 
-    The server runs indefinitely until a `KeyboardInterrupt` is received, 
-    which gracefully shuts it down.
-
-    The function uses an asyncio event loop to manage the asynchronous 
-    WebSocket server and runs it indefinitely.
-
-    Notes
-    -----
-    - The WebSocket server is designed to run on `ws://localhost:8080`.
-    - The `handler` function should be defined elsewhere to process incoming 
-      WebSocket connections.
-    - Proper logging is used to record server startup and shutdown events.
-
-    Raises
-    ------
-    KeyboardInterrupt
-        If the server is interrupted manually, it shuts down gracefully.
-
-    """
-    async def websocket_server():
-        logging.info("Starting WebSocket server on ws://localhost:8080")
-        # Start the WebSocket server and run it indefinitely
-        async with websockets.serve(handler, "localhost", 8080):
-            try:
-                await asyncio.Future()  # run forever
-            except KeyboardInterrupt:
-                logging.info("Shutting down the WebSocket server")
-
-    # Run the WebSocket server using asyncio's event loop
-    asyncio.run(websocket_server())
+# launch_gradio()
 
 
-async def main():
-    """
-    This function creates and starts a WebSocket server that listens on
-    `ws://localhost:8080` for incoming connections. It runs until manually
-    terminated or interrupted.
+@app.get("/")
+def root():
+    return {"msg": "Backend is running"}
 
-    Raises
-    ------
-    KeyboardInterrupt
-        If the server is manually terminated using a keyboard interrupt.
-    """
-    try:
-        # Starts the WebSocket server in a separate thread.
-        websocket_thread = threading.Thread(target=run_websocket_server, daemon=True)
-        websocket_thread.start() # Start the thread
 
-        # Run initialize_agent_server in the main thread
-        await initialize_agent_server()
-    except KeyboardInterrupt:
-        # Graceful exit on Ctrl+C
-        print("Program interrupted by user. Shutting down.")
-    except Exception as e:
-        # Handle unexpected errors
-        print(f"An unexpected error occurred: {e}")
-
-if __name__ =="__main__":
-    """
-    Entry point for the agent server script.
-
-    Based on the environment (`Config.env`), this script either:
-    1. Runs the `agent.talk` method in development mode.
-    2. Starts the WebSocket server in production mode.
-    3. Raises an exception if the environment is invalid.
-
-    Raises
-    ------
-    Exception
-        If `Config.env` is not set to "dev" or "prod".
-    """
-    if Config.env=="dev":
-        agent.talk()
-    elif Config.env=="prod":
-        try:
-            asyncio.run(main())
-        except Exception as e:
-            logging.error(f"Error running the server: {e}")
-    else:
-        raise Exception("Invalid environment. Must be 'dev' or 'prod'.")
+if __name__ == "__main__":
+    # For development, you might run: uvicorn fastapi_app:app --reload --host 0.0.0.0 --port 8000
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

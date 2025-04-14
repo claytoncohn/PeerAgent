@@ -560,7 +560,7 @@ class Agent:
             # end_btn = gr.Button("End Conversation")
             # end_btn.click(self._end_conversation)
 
-        demo.launch(share=False,inbrowser=False)
+        demo.launch(server_name="0.0.0.0", server_port=7860, share=False,inbrowser=False)
     
     def _end_conversation(self):
         """

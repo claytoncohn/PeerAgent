@@ -28,7 +28,7 @@ app.add_middleware(
 # user_agents: Dict[str, Agent] = {}
 
 #  Global variables and data structure
-chat_window_URL = "URL= http://127.0.0.1:7860",
+chat_window_URL = "URL= https://agent.c2-stem.org",
 computational_model_state = C2STEMState()
 agent = Agent(use_gui=True)
 
@@ -55,7 +55,7 @@ async def startup_event():
     threading.Thread(target=launch_agent, daemon=True).start()
 
 
-@app.post("/api/login")
+@app.post("/app/api/login")
 async def login(username: str = Body(...), password: str = Body(...)):
     # Dummy authentication.
     if not username or not password:
@@ -63,7 +63,7 @@ async def login(username: str = Body(...), password: str = Body(...)):
     # In production, validate against your MongoDB users store.
     return {"success": True, "username": username}
 
-@app.websocket("/ws/data")
+@app.websocket("/app/ws/data")
 async def handler(websocket: WebSocket):
     """
     Handles incoming WebSocket messages and maintains the user state.
@@ -146,7 +146,7 @@ async def handler(websocket: WebSocket):
 # launch_gradio()
 
 
-@app.get("/")
+@app.get("/app")
 def root():
     return {"msg": "Backend is running"}
 

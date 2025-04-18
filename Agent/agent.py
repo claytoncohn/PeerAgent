@@ -11,12 +11,14 @@ import gradio as gr
 import json
 import time
 from dotenv import load_dotenv
+
 load_dotenv()
 
 epoch_time = str(time.time()).split(".")[0]
 
 logging.info("Successfully imported Agent class libraries.")
 logging.basicConfig(level=logging.INFO)
+
 
 class Agent:
     """
@@ -84,13 +86,14 @@ class Agent:
     - The agent supports both terminal-based and GUI-based interactions.
     """
 
-    def __init__(self,use_gui=False):
+    def __init__(self, use_gui=False):
         # Currently hard-coded but will need to be dynamic
         self.group = 0
 
         self.use_gui = use_gui
-        self.RAG = RAG() 
-        self.has_spoken = False
+        self.RAG = RAG()
+        # self.has_spoken = False
+        self.has_spoken = {}
 
         self.messages = [{"role": "system", "content": self._load_file(Config.prompt_path)}]
         self.message_timestamps = [self._get_formatted_time()]
@@ -105,6 +108,11 @@ class Agent:
         logging.info(f"Successfully initialized Agent class in '{Config.env}' environment.")
 
         self.message_truncation_count = 0
+
+        self.user_list = []
+        self.user_hash = {}
+        self.chat_histories = {}
+        self.individual_messages = {}
 
     def _get_formatted_time(self):
         """
@@ -146,8 +154,8 @@ class Agent:
         except (FileNotFoundError, IOError) as e:
             logging.error(f"Error loading file from Agent class: '{file_path}': {e}")
             return ""
-        
-    def _save_messages(self):
+
+    def _save_messages(self, username, session):
         """
         Save the conversation messages to a file in JSON format.
 
@@ -174,17 +182,24 @@ class Agent:
             If an error occurs while writing to the file.
         """
         try:
-            save_path = Config.convo_save_path+"/"+Config.c2stem_task+"_Group"+str(self.group)+"_"+epoch_time+"_CONVO.json"
+            save_path = ''
+            for filename in os.listdir(Config.convo_save_path):
+                if session in filename:
+                    save_path = Config.convo_save_path + "/" + filename
+
+            if len(save_path) < 1:
+                save_path = Config.convo_save_path + "/" + Config.c2stem_task + "_Group" + str(
+                    self.group) + "_" + self.user_hash[session] + "_" + session + "_" + epoch_time + "_CONVO.json"
 
             # Merge messages sent/received to/from OpenAI w/ timestamps
             save_messages = []
-            for i in range(len(self.messages)):
-                m = self.messages[i]
+            for i in range(len(self.individual_messages[session])):
+                m = self.individual_messages[session][i]
                 m["timestamp"] = self.message_timestamps[i]
                 save_messages.append(m)
 
             with open(save_path, 'w') as f:
-                json.dump(self.messages, f, indent=4)
+                json.dump(self.individual_messages[session], f, indent=4)
                 logging.info(f"Successfully saved conversation from Agent class to: '{save_path}'")
         except Exception as e:
             logging.error(f"Error saving conversation from Agent class to: '{save_path}': {e}")
@@ -239,17 +254,19 @@ class Agent:
                 logging.info(f"Successfully called OpenAI API in Agent class.'")
                 return response.choices[0].message.content
             except openai.RateLimitError:
-                logging.error(f"Open AI Rate limit exceeded for response call from Agent, retry {i+1}/{Config.max_retries}.")
+                logging.error(
+                    f"Open AI Rate limit exceeded for response call from Agent, retry {i + 1}/{Config.max_retries}.")
                 time.sleep(Config.backoff_factor * (2 ** i))
             except openai.APIConnectionError as e:
-                logging.error(f"OpenAI API connection error for response call from Agent: {e}, retry {i+1}/{Config.max_retries}")
+                logging.error(
+                    f"OpenAI API connection error for response call from Agent: {e}, retry {i + 1}/{Config.max_retries}")
                 time.sleep(Config.backoff_factor * (2 ** i))
             except openai.APIError as e:
-                logging.error(f"OpenAI API error for response call from Agent: {e}, retry {i+1}/{Config.max_retries}")
+                logging.error(f"OpenAI API error for response call from Agent: {e}, retry {i + 1}/{Config.max_retries}")
                 time.sleep(Config.backoff_factor * (2 ** i))
         return "I'm sorry, I don't think I'm understanding you correctly. Can you explain?"
-        
-    def _print_messages(self,i=0):
+
+    def _print_messages(self, session, i=0):
         """
         Print the stored messages along with their roles and content.
 
@@ -275,19 +292,21 @@ class Agent:
         - The function displays conversation metadata such as the total message count, word count, and truncation count.
         - The total running word count helps monitor token usage in the conversation.
         """
-       
+
         print("\n\n***************************************************************************")
-        for m in self.messages[-i:]:
+        # for m in self.messages[-i:]:
+        for m in self.individual_messages[session][-i:]:
             print("------------------------------------------------------------------------")
             print("ROLE:", m["role"])
             print("CONTENT:", m["content"])
         print("------------------------------------------------------------------------")
-        print(f"Total messages in list: {len(self.messages)}")
+        # print(f"Total messages in list: {len(self.messages)}")
+        print(f"Total messages in list: {len(self.individual_messages[session])}")
         print(f"Total word count for all messages: {self.running_word_count}")
         print(f"Truncation count: {self.message_truncation_count}")
         print("***************************************************************************\n\n")
 
-    def _process_query(self, user_query):
+    def _process_query(self, user_query, username, session):
         """
         Processes a user query, retrieves relevant domain knowledge, interacts with OpenAI's API, and updates the conversation.
 
@@ -315,7 +334,9 @@ class Agent:
         - The conversation history is maintained in `self.messages`, where each entry is a dictionary with keys "role" and "content".
         - The method sets `self.has_spoken` to `True` after the first query to indicate that the agent has responded.
         """
-        if not self.has_spoken:
+        if session not in self.has_spoken:
+            self.has_spoken[session] = False
+        if not self.has_spoken[session]:
             # First query: Perform RAG retrieval, first summarize the user's query and computational model
             query_plus_comp_model_summary = self._get_query_plus_comp_model_summary(user_query)
 
@@ -329,11 +350,12 @@ class Agent:
             else:
 
                 # Embedding retrieval successful
-                q_embed = q_embed[0] 
+                q_embed = q_embed[0]
 
                 retrieval_result = self.RAG.retrieve(q_embed, 3)
                 if retrieval_result is None or "matches" not in retrieval_result or not retrieval_result["matches"]:
-                    logging.error("Failed to retrieve knowledge base matches in Agent class, using fallback domain context.")
+                    logging.error(
+                        "Failed to retrieve knowledge base matches in Agent class, using fallback domain context.")
                     domain_context = "No domain knowledge available currently due to failed RAG retrieval."
                 else:
 
@@ -342,7 +364,8 @@ class Agent:
                     domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
 
             # Save retrieved domain knowledge
-            rag_retrieval_save_path = Config.retrieved_domain_knowledge_save_path+Config.c2stem_task+"_Group"+str(self.group)+"_"+epoch_time+"_RAG.json"
+            rag_retrieval_save_path = Config.retrieved_domain_knowledge_save_path + Config.c2stem_task + "_Group" + str(
+                self.group) + "_" + self.user_hash[session] + "_" + epoch_time + "_RAG.json"
 
             try:
                 with open(rag_retrieval_save_path, "a") as f:
@@ -354,24 +377,28 @@ class Agent:
                     json.dump(domain_knowledge_dict, f, indent=4)
                     logging.info(f"Saved retrieved domain knowledge in Agent class to: '{rag_retrieval_save_path}'")
             except Exception as e:
-                logging.error(f"Error saving retrieved domain knowledge in Agent class to: '{rag_retrieval_save_path}': {e}")
-            
+                logging.error(
+                    f"Error saving retrieved domain knowledge in Agent class to: '{rag_retrieval_save_path}': {e}")
+
             # Update messages with domain context (fallback or actual context)
-            self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
-    
+            # self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
+            self.individual_messages[session][0]["content"] += f"\n\nDomain Context:\n{domain_context}"
+
             # Create the initial user message and student model
             user_message_str = f"Student Query:\n{user_query}\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
-        
+
         else:
             # Subsequent queries: only include the user query/response in the messages + computational model
             user_message_str = user_query
             user_message_str += f"\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
-        
-        self.messages.append({"role": "user", "content": user_message_str})
+
+        # self.messages.append({"role": "user", "content": user_message_str})
+        self.individual_messages[session].append({"role": "user", "content": user_message_str})
         self.message_timestamps.append(self._get_formatted_time())
 
         # Truncate messages if approaching token threshold for the model
-        truncated_messages = [self.messages[0]]+self.messages[1+self.message_truncation_count:]
+        # truncated_messages = [self.messages[0]] + self.messages[1 + self.message_truncation_count:]
+        truncated_messages = [ self.individual_messages[session][0]] +  self.individual_messages[session][1 + self.message_truncation_count:]
 
         # # To test truncation
         # if len(truncated_messages)!=len(self.messages):
@@ -387,27 +414,32 @@ class Agent:
         #     print("***************************************************************************\n\n")
 
         response_text = self._get_openai_response(truncated_messages)
-        if not self.use_gui: 
+        if not self.use_gui:
             print(f"\n{Config.agent_name}: {response_text}\n")
-        self.messages.append({"role": "assistant", "content": response_text})
+        # self.messages.append({"role": "assistant", "content": response_text})
+        self.individual_messages[session].append({"role": "assistant", "content": response_text})
         self.message_timestamps.append(self._get_formatted_time())
 
+        # self.running_word_count += \
+        #     len(self.messages[-2]["content"].split()) + \
+        #     len(self.messages[-1]["content"].split())
+
         self.running_word_count += \
-            len(self.messages[-2]["content"].split()) + \
-            len(self.messages[-1]["content"].split())
-        
+            len(self.individual_messages[session][-2]["content"].split()) + \
+            len(self.individual_messages[session][-1]["content"].split())
+
         if self.running_word_count > Config.word_threshold:
             self.message_truncation_count += 2
 
             # To test truncation
             # print(f"TRUNCATED NOW {self.message_truncation_count}")
 
-        self._print_messages(2)
-        self._save_messages()
+        self._print_messages(session, 2)
+        self._save_messages(username, session)
 
         # Set flag to indicate that the agent has spoken
-        if not self.has_spoken:
-            self.has_spoken = True
+        if not self.has_spoken[session]:
+            self.has_spoken[session] = True
 
     def _get_query_plus_comp_model_summary(self, user_query):
         """
@@ -437,7 +469,7 @@ class Agent:
         summary_messages = [{"role": "system", "content": self._load_file(Config.rag_summary_prompt_path)}]
 
         with open(Config.summary_few_shot_instances_path, 'r') as f:
-            few_shot_instances = json.load(f) 
+            few_shot_instances = json.load(f)
         for inst in few_shot_instances:
             student_group = inst["student_group"]
             student_query = inst["user_query"]
@@ -447,14 +479,15 @@ class Agent:
             group_query_model_string = f"Student Group:\n{student_group}\n\Student Query:\n{student_query}\n\nStudent Computational Model:\n{student_computational_model}"
             summary_messages.append({"role": "user", "content": group_query_model_string})
             summary_messages.append({"role": "assistant", "content": assistat_response})
-        
+
         current_group_query_model_string = f"Student Group:\n1\n\Student Query:\n{user_query}\n\nStudent Computational Model:\n{self.learner_model.user_model}"
         summary_messages.append({"role": "user", "content": current_group_query_model_string})
 
         summary = self._get_openai_response(summary_messages)
-        logging.info(f"\n\nRetrieved the following summary of the students' current problem in the Agent class: {summary}\n\n")
+        logging.info(
+            f"\n\nRetrieved the following summary of the students' current problem in the Agent class: {summary}\n\n")
         return summary
-       
+
     def _get_dynamic_intro_string(self):
         """
         Generates a dynamically rephrased introduction string using an OpenAI response.
@@ -467,14 +500,14 @@ class Agent:
         intro_str = f"Hi, I'm {Config.agent_name}, a collaborative peer agent! Is there something I can help you with?"
         intro_str_rephrase = self._get_openai_response(
             messages=
-                [
-                    {"role": "system", "content": "Rephrase this introduction:\n"},
-                    {"role": "user", "content": intro_str}
-                ],
+            [
+                {"role": "system", "content": "Rephrase this introduction:\n"},
+                {"role": "user", "content": intro_str}
+            ],
             temperature=0.5
         )
         return intro_str_rephrase
-    
+
     def _is_message_in_stop_words(self, message):
         """
         Check if a message is in the predefined set of stop words.
@@ -501,10 +534,10 @@ class Agent:
         if self.use_gui:
             self._talk_with_gui()
             return
-        
+
         intro_str = self._get_dynamic_intro_string()
-        
-        user_query = input(f"\n{Config.agent_name}: "+intro_str+"\n\n"+"Student: ").lower()
+
+        user_query = input(f"\n{Config.agent_name}: " + intro_str + "\n\n" + "Student: ").lower()
 
         # if self._is_message_in_stop_words(user_query):
         #     self._end_conversation()
@@ -518,8 +551,8 @@ class Agent:
             self._process_query(new_query)
 
         # self._end_conversation()
-    
-    def _gui_respond(self, message, chat_history):
+
+    def _gui_respond(self, message, chat_history, request: gr.Request):
         """
         Handles the chatbot's response to a user message within the Gradio GUI.
 
@@ -537,31 +570,41 @@ class Agent:
         chat_history : list of tuples
             The updated chat history, with the new user message and the chatbot's response appended.
         """
-        self._process_query(message)
-        bot_message = self.messages[-1]["content"]
-        chat_history.append((message, bot_message))
-        return "",chat_history
-    
+        username = request.request.cookies['username']
+        if request.session_hash not in self.user_list:
+            self.user_list.append(request.session_hash)
+            self.user_hash[request.session_hash] = username
+        if request.session_hash not in self.individual_messages:
+            self.individual_messages[request.session_hash] = self.messages.copy()
+        self._process_query(message, username,request.session_hash)
+
+        # bot_message = self.messages[-1]["content"]
+        bot_message =self.individual_messages[request.session_hash][-1]["content"]
+        if request.session_hash not in self.chat_histories:
+            self.chat_histories[request.session_hash] = chat_history
+        # chat_history.append((message, bot_message))
+        self.chat_histories[request.session_hash].append((message, bot_message))
+        return "", self.chat_histories[request.session_hash]
+
     def _talk_with_gui(self):
         """
         Launches the Gradio GUI for interacting with the agent.
         """
         with gr.Blocks() as demo:
-            gr.Markdown("""<h1><center>Copa: A Collaborative Peer Agent for C2STEM</center></h1>""") 
+            gr.Markdown("""<h1><center>Copa: A Collaborative Peer Agent for C2STEM</center></h1>""")
             greeting = self._get_dynamic_intro_string()
-            chatbot = gr.Chatbot(height=240,value=[[None, greeting]],show_label=False)
+            chatbot = gr.Chatbot(height=240, value=[[None, greeting]], show_label=False)
 
             msg = gr.Textbox(label="Message")
-            msg.submit(self._gui_respond, inputs=[msg, chatbot], outputs=[msg, chatbot]) #Press enter to submit
+            msg.submit(self._gui_respond, inputs=[msg, chatbot], outputs=[msg, chatbot])  # Press enter to submit
 
             send_btn = gr.Button("Send")
             send_btn.click(self._gui_respond, inputs=[msg, chatbot], outputs=[msg, chatbot])
 
             # end_btn = gr.Button("End Conversation")
             # end_btn.click(self._end_conversation)
+        demo.launch(server_name="0.0.0.0", server_port=7860, share=False, inbrowser=False)
 
-        demo.launch(server_name="0.0.0.0", server_port=7860, share=False,inbrowser=False)
-    
     def _end_conversation(self):
         """
         Terminates the conversation and handles any cleanup tasks.

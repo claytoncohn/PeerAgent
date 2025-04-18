@@ -3,6 +3,7 @@ import json
 from typing import Dict
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from agent import Agent  # Ensure agent.py is in the same folder
 import uvicorn
 from globals import Config
@@ -14,6 +15,7 @@ import logging
 import threading
 import asyncio
 import gradio.queueing as queueing
+import os
 
 app = FastAPI()
 
@@ -26,10 +28,12 @@ app.add_middleware(
 )
 
 # user_agents: Dict[str, Agent] = {}
+user_computational_models: Dict[str, C2STEMState] = {}
 
 #  Global variables and data structure
+# chat_window_URL = "URL= http://localhost:7860",
 chat_window_URL = "URL= https://agent.c2-stem.org",
-computational_model_state = C2STEMState()
+# computational_model_state = C2STEMState()
 agent = Agent(use_gui=True)
 
 original_init = queueing.Queue.__init__
@@ -61,10 +65,52 @@ async def login(username: str = Body(...), password: str = Body(...)):
     if not username or not password:
         raise HTTPException(status_code=400, detail="Username and password required")
     # In production, validate against your MongoDB users store.
-    return {"success": True, "username": username}
+    # return {"success": True, "username": username}
+    resp = JSONResponse({"success": True, "username": username})
+    # Domain must match where Gradio lives:
+    resp.set_cookie(
+        key="username",
+        value=username,
+        domain="agent.c2-stem.org",
+        httponly=False,  # set True if JS shouldn’t read it; we’ll read in Python
+        secure=True,  # HTTPS only
+        samesite="lax"
+    )
+    return resp
+
+@app.post("/app/api/conversations")
+async def get_conversations():
+    data_dict = {}
+    for filename in os.listdir(Config.convo_save_path):
+        file_path = os.path.join(Config.convo_save_path, filename)
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = json.load(f)
+                key = filename.split("_")[3]
+                data_dict[key] = content
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"Warning: Could not load {filename}: {e}")
+
+    return data_dict
+
+@app.post("/app/api/conversations/{username}")
+async def get_conversation(username):
+    data_dict = {}
+    for filename in os.listdir(Config.convo_save_path):
+        if username in filename:
+            file_path = os.path.join(Config.convo_save_path, filename)
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = json.load(f)
+                    key = filename.split("_")[3]
+                    data_dict[key] = content
+            except (json.JSONDecodeError, OSError) as e:
+                print(f"Warning: Could not load {filename}: {e}")
+
+    return data_dict
 
 @app.websocket("/app/ws/data")
-async def handler(websocket: WebSocket):
+async def handler(websocket: WebSocket, username: str = Query(...)):
     """
     Handles incoming WebSocket messages and maintains the user state.
 
@@ -100,6 +146,10 @@ async def handler(websocket: WebSocket):
     # agent = user_agents[username]
     # agent.talk()
     try:
+        if username not in user_computational_models:
+            user_computational_models[username] = C2STEMState();
+        computational_model_state = user_computational_models[username]
+
         # Assigning websocket to user state to be used globally.
         computational_model_state.set_socket(websocket)
         global chat_window_URL

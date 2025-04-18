@@ -570,6 +570,8 @@ class Agent:
         chat_history : list of tuples
             The updated chat history, with the new user message and the chatbot's response appended.
         """
+        print(request)
+        print(request.request)
         username = request.request.cookies['username']
         if request.session_hash not in self.user_list:
             self.user_list.append(request.session_hash)

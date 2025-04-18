@@ -72,9 +72,9 @@ async def login(username: str = Body(...), password: str = Body(...)):
         key="username",
         value=username,
         domain="agent.c2-stem.org",
-        httponly=False,  # set True if JS shouldn’t read it; we’ll read in Python
-        secure=True,  # HTTPS only
-        samesite="lax"
+        httponly=False,
+        secure=True,
+        samesite="none"
     )
     return resp
 

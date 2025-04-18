@@ -593,6 +593,19 @@ class Agent:
         Launches the Gradio GUI for interacting with the agent.
         """
         with gr.Blocks() as demo:
+            gr.HTML("""
+                <script>
+                  window.addEventListener('message', (e) => {
+                    // only accept from your parent origin
+                    if (e.origin !== 'https://localhost:8002') return;
+                    const { name, value } = e.data;
+                    // set a host‑only cookie on agent.c2-stem.org
+                    document.cookie = `${name}=${value}; Path=/;`;
+                  });
+                  // optionally, ack back:
+                  // e.source.postMessage({ ack: true }, e.origin);
+                </script>
+                """)
             gr.Markdown("""<h1><center>Copa: A Collaborative Peer Agent for C2STEM</center></h1>""")
             greeting = self._get_dynamic_intro_string()
             chatbot = gr.Chatbot(height=240, value=[[None, greeting]], show_label=False)

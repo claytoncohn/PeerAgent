@@ -1,0 +1,226 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0" version="24.7.16">
+  <diagram name="Page-1" id="KXk8Mm1XggXIFJz8BSJv">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.6;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-12" target="ZRBP9ODFsF6voFNSeBn5-58">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="140" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-12" value="C2STEM" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="55" width="150" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-15" value="" style="group" connectable="0" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-12">
+          <mxGeometry x="20" y="30" width="135" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-8" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://png.pngtree.com/png-vector/20230218/ourmid/pngtree-laptop-icon-png-image_6606927.png;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-15">
+          <mxGeometry x="-13.5" width="138.46153846153845" height="77.89090909090909" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-21" value="&lt;b&gt;Learner Model&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="185" y="480" width="140" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-22" value="Domain knowledge" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="30" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-68" value="Cognitive modeling" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="50" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-69" value="Affective state" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="70" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-70" value="SRL behaviors" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="90" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-71" value="Strategies" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="110" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-72" value="Social metrics" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="130" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-32" value="Synergy score" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="150" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="QN1toQaZpZorLLNbI5c8-17" value="Current model score" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="170" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZwiHklV0yCP5NGC2s7b_-1" value="Difficulties" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry y="190" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="QN1toQaZpZorLLNbI5c8-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=none;startFill=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-25" target="ZRBP9ODFsF6voFNSeBn5-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QN1toQaZpZorLLNbI5c8-13" value="&lt;div&gt;interact&lt;/div&gt;&lt;div&gt;&amp;nbsp;with&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="QN1toQaZpZorLLNbI5c8-12">
+          <mxGeometry x="0.2036" y="-3" relative="1" as="geometry">
+            <mxPoint x="-18" y="-3" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-25" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Students&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="30" y="80" width="40" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-29" value="&lt;b&gt;Domain KB&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="410" y="480" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-30" value="Physics" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-29">
+          <mxGeometry y="30" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-31" value="Computing" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-29">
+          <mxGeometry y="50" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-58" value="Data" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="420" width="150" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="QN1toQaZpZorLLNbI5c8-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="ZRBP9ODFsF6voFNSeBn5-58" source="ZRBP9ODFsF6voFNSeBn5-47" target="ZRBP9ODFsF6voFNSeBn5-87">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QN1toQaZpZorLLNbI5c8-19" value="used to generate" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="QN1toQaZpZorLLNbI5c8-6">
+          <mxGeometry x="-0.0846" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-47" value="Discourse (&lt;b&gt;Audio&lt;/b&gt;)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-58">
+          <mxGeometry x="15" y="160" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-87" value="Transcribed Speech (&lt;b&gt;Text&lt;/b&gt;)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-58">
+          <mxGeometry x="15" y="230" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-57" value="&lt;div&gt;&lt;b&gt;Logs&lt;/b&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Logged Actions&lt;/i&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Task Context&lt;/i&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;Student Models&lt;/i&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-58">
+          <mxGeometry x="15" y="30" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-45" value="&lt;b&gt;Video&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-58">
+          <mxGeometry x="15" y="120" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-112" value="&lt;b&gt;Dialogue Manager&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="410" y="320" width="140" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-113" value="Rules/heuristics" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-112">
+          <mxGeometry y="30" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-114" value="Sliding context window" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-112">
+          <mxGeometry y="50" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-115" value="Summarization" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-112">
+          <mxGeometry y="70" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-116" value="State management" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-112">
+          <mxGeometry y="90" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-117" value="Teacher preferences" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="ZRBP9ODFsF6voFNSeBn5-112">
+          <mxGeometry y="110" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ZRBP9ODFsF6voFNSeBn5-125" value="&lt;b&gt;LLM&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="170" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.499;exitY=0.941;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="QN1toQaZpZorLLNbI5c8-14" target="ZRBP9ODFsF6voFNSeBn5-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-40" value="&lt;div&gt;maintains&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-39">
+          <mxGeometry x="-0.0361" y="1" relative="1" as="geometry">
+            <mxPoint x="-1" y="11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-56" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.625;exitY=0.2;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="QN1toQaZpZorLLNbI5c8-14" target="ZRBP9ODFsF6voFNSeBn5-125">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-57" value="&lt;div&gt;intervenes &lt;br&gt;&lt;/div&gt;&lt;div&gt;via&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-56">
+          <mxGeometry x="-0.0522" y="2" relative="1" as="geometry">
+            <mxPoint x="-8" y="7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QN1toQaZpZorLLNbI5c8-14" value="&lt;div&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;&lt;u&gt;Agent&lt;/u&gt;&lt;/b&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;Maintains learner model&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;Identifies inflection points&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;Monitors student progress&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;Decides whether to intervene&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;Decides how to intervene&lt;br&gt;&lt;/font&gt;&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="140" y="210" width="230" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-1" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.198;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="ZRBP9ODFsF6voFNSeBn5-58">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="51" y="170" as="sourcePoint" />
+            <mxPoint x="460" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-2" value="generate" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-1">
+          <mxGeometry x="-0.1159" y="2" relative="1" as="geometry">
+            <mxPoint x="-2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-29" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-25" target="ZRBP9ODFsF6voFNSeBn5-125">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="60" y="87" as="sourcePoint" />
+            <mxPoint x="560" y="280" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="50" y="20" />
+              <mxPoint x="480" y="20" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-30" value="&lt;div&gt;communicate&lt;/div&gt;&lt;div&gt;with&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-29">
+          <mxGeometry x="-0.0205" y="-37" relative="1" as="geometry">
+            <mxPoint x="-38" y="-37" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-34" value="generates" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="1">
+          <mxGeometry x="109.99798069383138" y="279.9989126895546" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-36" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.31;entryY=0.8;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-58" target="QN1toQaZpZorLLNbI5c8-14">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="360" as="sourcePoint" />
+            <mxPoint x="440" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-37" value="informs" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-36">
+          <mxGeometry x="-0.0372" y="-1" relative="1" as="geometry">
+            <mxPoint y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.651;entryY=0.941;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-21" target="QN1toQaZpZorLLNbI5c8-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-42" value="informs" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-41">
+          <mxGeometry x="-0.1366" y="-2" relative="1" as="geometry">
+            <mxPoint x="-2" y="-14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-44" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.8;entryY=0.8;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-114" target="QN1toQaZpZorLLNbI5c8-14">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="370" y="460" as="sourcePoint" />
+            <mxPoint x="420" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-45" value="informs" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-44">
+          <mxGeometry x="0.0342" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-30" target="ZRBP9ODFsF6voFNSeBn5-125">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-49" value="&lt;div&gt;uses RAG to&amp;nbsp;&lt;/div&gt;&lt;div&gt;provide context to&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-48">
+          <mxGeometry x="0.3933" y="-1" relative="1" as="geometry">
+            <mxPoint y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.195;entryY=-0.01;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-125" target="ZRBP9ODFsF6voFNSeBn5-112">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-58" value="&lt;div&gt;sends&amp;nbsp;&lt;/div&gt;&lt;div&gt;dialogue to&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-54">
+          <mxGeometry x="-0.4629" y="1" relative="1" as="geometry">
+            <mxPoint x="-4" y="39" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.79;entryY=0.95;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ZRBP9ODFsF6voFNSeBn5-112" target="ZRBP9ODFsF6voFNSeBn5-125">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-59" value="&lt;div&gt;uses RAG to retrieve&lt;/div&gt;&lt;div&gt;dialogue for&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="6NCmuTmmUv-f615UZ2zf-55">
+          <mxGeometry x="-0.2944" y="-1" relative="1" as="geometry">
+            <mxPoint y="-34" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6NCmuTmmUv-f615UZ2zf-62" value="&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;font-size: 18px;&quot; align=&quot;left&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;u style=&quot;&quot;&gt;Nodes&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Agent&lt;/b&gt;&lt;/span&gt;. Knowledgeable peer agent in C2STEM responsible for making decisions. Sits on top of C2STEM, but is not part of it directly.&lt;br style=&quot;font-size: 14px;&quot;&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Students&lt;/b&gt;&lt;/span&gt;. Students collaborating in C2STEM.&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;C2STEM&lt;/b&gt;&lt;/span&gt;. C2STEM GUI/environment.&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Data&lt;/b&gt;&lt;/span&gt;. Data generated by students (via lapel mics and webcam) and C2STEM (via logs)&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Learner model&lt;/b&gt;&lt;/span&gt;. State of current dyad and individual students.&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;LLM&lt;/b&gt;&lt;/span&gt;. Mechanism through which the agent communicates with the students (via API call, external to C2STEM).&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Dialogue manager&lt;/b&gt;&lt;/span&gt;. Maintains previous conversations for LLM context and agent use.&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Domain knowledge Base&lt;/b&gt;&lt;/span&gt;. Vector store of physics/computing knowledge for RAG retrieval.&lt;/font&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br style=&quot;font-size: 14px;&quot;&gt;&lt;/font&gt;&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;&lt;u&gt;&lt;br&gt;&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;&lt;u&gt;Edges&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;&lt;u&gt;&lt;br&gt;&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Students&lt;/b&gt;&lt;b&gt; &lt;/b&gt;&lt;u&gt;interact with&lt;/u&gt; &lt;b&gt;C2STEM&lt;/b&gt; environment while problem solving.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Students &lt;/b&gt;&lt;u&gt;generate&lt;/u&gt; video/speech &lt;b&gt;data&lt;/b&gt; via lapel mics and webcam.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;Speech &lt;b&gt;data&lt;/b&gt; &lt;u&gt;generates&lt;/u&gt; text &lt;b&gt;data &lt;/b&gt;via ASR&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Students &lt;/b&gt;and &lt;b&gt;LLM&lt;/b&gt; &lt;u&gt;communicate with each other.&lt;/u&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;u&gt;&lt;br&gt;&lt;/u&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;C2STEM &lt;/b&gt;&lt;u&gt;generates&lt;/u&gt; (log) &lt;b&gt;data&lt;/b&gt;.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;C2STEM &lt;/b&gt;&lt;u&gt;requests&lt;/u&gt; &lt;b&gt;agent&lt;/b&gt;, i.e., students request agent help via C2STEM.&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Data&lt;/b&gt; &lt;u&gt;informs&lt;/u&gt; &lt;b&gt;Agent&lt;/b&gt; by providing decision-making information.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Agent &lt;/b&gt;&lt;u&gt;maintains&lt;/u&gt;&lt;b&gt; learner model&lt;/b&gt; by tracking student states.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Learner model &lt;/b&gt;&lt;u&gt;informs&lt;/u&gt; &lt;b&gt;agent&lt;/b&gt; to guide its decision-making.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Agent&lt;/b&gt; &lt;u&gt;intervenes&lt;/u&gt; and communicates w/ students via &lt;b&gt;LLM&lt;/b&gt;.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;LLM &lt;/b&gt;&lt;u&gt;sends dialogue&lt;/u&gt; to &lt;b&gt;dialogue manager&lt;/b&gt; to track conversations.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Dialogue manager &lt;/b&gt;&lt;u&gt;retrieves dialog for&lt;/u&gt; LLM to use as context.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Dialogue manager&lt;/b&gt; &lt;u&gt;informs&lt;/u&gt; &lt;b&gt;agent&lt;/b&gt; by providing it information from the conversations to make decisions (i.e., guide the tone of the conversation, update the learner model, etc.)&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Domain knowledge base &lt;/b&gt;&lt;u&gt;provides context to&lt;/u&gt; &lt;b&gt;LLM &lt;/b&gt;via RAG. &lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="630" y="20" width="460" height="810" as="geometry" />
+        </mxCell>
+        <mxCell id="BHdU80PYM196cv5NEYs7-9" value="&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;font-size: 18px;&quot; align=&quot;left&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;u style=&quot;&quot;&gt;Future Work&lt;br&gt;&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot; align=&quot;left&quot;&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;u style=&quot;&quot;&gt;&lt;br&gt;&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Processes&lt;/b&gt;. Each of these sub-processes will require its own diagram, complete with components like models/API calls.&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Triggers&lt;/b&gt;. How the Agent uses the data, learner model, and dialogue manager to trigger supports needs to be hashed out.&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="700" width="520" height="140" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

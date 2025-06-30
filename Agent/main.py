@@ -6,6 +6,8 @@ import json
 from c2stem_state import C2STEMState
 import logging
 import threading
+from c2stem_action import C2STEMAction
+import time
 
 """
 This is the entry file to the agent server implementation. 
@@ -85,9 +87,8 @@ async def handler(websocket):
 
                 # Process C2STEM physics actions
                 if message['type'] == "action":
-                    pass # Not using actions yet
-                    # computational_model_state.add_actions(str(message['data']))
-                    # logging.info(f"Action added: {message['data']}")
+                    agent.learner_model.actions.append(C2STEMAction(message['data']))
+                    logging.info(f"Action added:\nTime: {agent.learner_model.actions[-1].t}, Action Type: {agent.learner_model.actions[-1].action_type}, Block: {agent.learner_model.actions[-1].block}")
 
                 # Update the user model
                 elif message['type'] == "state":

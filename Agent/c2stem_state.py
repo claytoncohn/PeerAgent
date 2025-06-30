@@ -13,55 +13,37 @@ class C2STEMState:
 
         Attributes
         ----------
-        actions : list of str
-            A list to store actions received from the client.
         user_model : str
             The current user model received from the client.
         socket : object
             The WebSocket connection associated with the client.
+
+        Methods
+        -------
+        set_user_model(model: str)
+            Updates the user model in the state.
+        get_user_model()
+            Retrieves the current user model.
+        set_socket(socket)
+            Assigns a WebSocket connection to the state.
+        get_socket()
+            Retrieves the assigned WebSocket connection.
         """
-        self.actions = []
         self.user_model = ""
         self.socket = ''
-
-    # Add actions to state
-    def add_actions(self, action: str):
-        """
-        Adds a new action to the state.
-
-        Parameters
-        ----------
-        action : str
-            The action string to be added to the list of actions.
-        """
-        self.actions.append(action)
-
-    # Get actions from state
-    def get_actions(self):
-        """
-        Retrieves all stored actions.
-
-        Returns
-        -------
-        list of str
-            The list of actions stored in the state.
-        """
-        return self.actions
 
     # Set user model received from state
     def set_user_model(self, model: str):
         """
         Updates the user model in the state.
 
-        This method sets the `user_model` to the new value while preserving
-        the current model as `prev_model`.
+        This method sets the `user_model` to the new value.
 
         Parameters
         ----------
         model : str
             The new user model to update the state with.
         """
-        self.prev_model = self.user_model
         self.user_model = model
 
     # Get user model from state

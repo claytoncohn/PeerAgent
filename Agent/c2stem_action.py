@@ -81,66 +81,66 @@ class C2STEMAction:
         self.t = self.data["time"]
         self.action_type = self.data["type"]
 
-        match self.action_type:
-            case "addBlock":
-                block_str = self.data['args'][0]
-                if len(block_str) > 0:
-                    mtch = re.search(r's="([^"]+)"', block_str)
-                    self.block = mtch.group(1)
-                    block_id = self.data['args'][4][0]
+        if self.action_type == "addBlock":
+            block_str = self.data['args'][0]
+            if len(block_str) > 0:
+                mtch = re.search(r's="([^"]+)"', block_str)
+                self.block = mtch.group(1)
+                block_id = self.data['args'][4][0]
+                self.block_map[block_id] = self.block
+            else:
+                self.block = ''
+            logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
+        elif self.action_type=="moveBlock":
+            block_str = self.data['args'][0]
+            if len(block_str) > 0:
+                mtch = re.search(r's="([^"]+)"', block_str)
+                self.block = mtch.group(1)
+                block_id = self.data['args'][3][0][0]
+                if block_id:
                     self.block_map[block_id] = self.block
-                else:
-                    self.block = ''
-                logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
-            case "moveBlock":
-                block_str = self.data['args'][0]
-                if len(block_str) > 0:
-                    mtch = re.search(r's="([^"]+)"', block_str)
-                    self.block = mtch.group(1)
-                    block_id = self.data['args'][3][0][0]
-                    if block_id:
-                        self.block_map[block_id] = self.block
-                else:
-                    self.block = ''
-                logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
-            case "setField":
-                block_str = self.data['args'][0].split("/")[0]
-                if len(block_str) > 0:
-                    if block_str in self.block_map:
-                        self.block = self.block_map[block_str]
-                        logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
-                    else:
-                        self.block = ""
-                        logging.error(f"No 's' attribute found in block string: {data}")
+            else:
+                self.block = ''
+            logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
+        elif self.action_type=="setField":
+            block_str = self.data['args'][0].split("/")[0]
+            if len(block_str) > 0:
+                if block_str in self.block_map:
+                    self.block = self.block_map[block_str]
+                    logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
                 else:
                     self.block = ""
                     logging.error(f"No 's' attribute found in block string: {data}")
-            case "setBlockPosition":
-                block_str = self.data['args'][0]
-                if len(block_str) > 0:
-                    if block_str in self.block_map:
-                        self.block = self.block_map[block_str]
-                        logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
-                    else:
-                        self.block = ""
-                        logging.error(f"No 's' attribute found in block string: {data}")
-                else:
-                    self.block = ""
-                    logging.error(f"No 's' attribute found in block string: {data}")
-            case "removeBlock":
-                block_str = self.data['args'][0]
-                if len(block_str) > 0:
-                    if block_str in self.block_map:
-                        self.block = self.block_map[block_str]
-                        logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
-                    else:
-                        self.block = ""
-                        logging.error(f"No 's' attribute found in block string: {data}")
-                else:
-                    self.block = ""
-                    logging.error(f"No 's' attribute found in block string: {data}")
-            case _:
+            else:
                 self.block = ""
+                logging.error(f"No 's' attribute found in block string: {data}")
+        elif self.action_type=="setBlockPosition":
+            block_str = self.data['args'][0]
+            if len(block_str) > 0:
+                if block_str in self.block_map:
+                    self.block = self.block_map[block_str]
+                    logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
+                else:
+                    self.block = ""
+                    logging.error(f"No 's' attribute found in block string: {data}")
+            else:
+                self.block = ""
+                logging.error(f"No 's' attribute found in block string: {data}")
+        elif self.action_type=="removeBlock":
+            block_str = self.data['args'][0]
+            if len(block_str) > 0:
+                if block_str in self.block_map:
+                    self.block = self.block_map[block_str]
+                    logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
+                else:
+                    self.block = ""
+                    logging.error(f"No 's' attribute found in block string: {data}")
+            else:
+                self.block = ""
+                logging.error(f"No 's' attribute found in block string: {data}")
+        else:
+            self.block = ""
+
         # Extract the <block … s="…"> attribute
         # block_str = self.data['args'][0]
         # mtch = re.search(r's="([^"]+)"', block_str)

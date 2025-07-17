@@ -87,12 +87,8 @@ async def handler(websocket):
 
                 # Process C2STEM physics actions
                 if message['type'] == "action":
-
-                    # WILL IMPLEMENT AFTER ACTIONS ARE STRUCTURED BEFORE COMING THROUGH
                     agent.learner_model.actions.append(C2STEMAction(message['data']))
                     logging.info(f"Action added:\nTime: {agent.learner_model.actions[-1].t}, Action Type: {agent.learner_model.actions[-1].action_type}, Block: {agent.learner_model.actions[-1].block}")
-                    # logging.info(f"Action received: {message['data']}")
-                    pass
                 
                 # Update the user model
                 elif message['type'] == "state":

@@ -547,7 +547,22 @@ class Agent:
         Launches the Gradio GUI for interacting with the agent.
         """
         with gr.Blocks() as demo:
-            gr.Markdown("""<h1><center>Copa: A Collaborative Peer Agent for C2STEM</center></h1>""") 
+            with gr.Row():
+                # Image c/o FlatIcon.com:
+                #   https://www.flaticon.com/free-icon/student_257651
+                gr.Image(
+                    "peer_agent_image.png",
+                    width=100,
+                    height=100,
+                    show_label=False,show_download_button=False,show_fullscreen_button=False,\
+                        show_share_button=False,interactive=False
+                )
+
+            gr.Markdown(
+                "<h2 style='text-align:center'>"
+                "Copa: A Collaborative Peer Agent for C2STEM"
+                "</h2>"
+            )
             greeting = self._get_dynamic_intro_string()
             chatbot = gr.Chatbot(height=240,value=[[None, greeting]],show_label=False)
 

@@ -1,3 +1,5 @@
+from collections import deque
+
 class LearnerModel:
     """
     Learner model of students using C2STEM. This tracks things like the students' computational model state and actions.
@@ -7,19 +9,22 @@ class LearnerModel:
     ----------
     user_model : str
         A string representing the students' current computational model in C2STEM.
-    actions : list
-        A list of actions taken by the student in the C2STEM environment.
+    actions : deque
+        A deque of the last N actions (defined in .env) taken by the student in the C2STEM environment. 
+        Each action is represented as a dictionary with keys "time", "type", and "block".
+    model_score : int
+        A score representing the quality of the student's computational model.
 
     Methods
     -------
     print_model_state()
         Prints the current state of the C2STEM model.
+    print_actions()
+        Prints the list of the last N actions (defined in .env) taken by the student in the C2STEM environment.
     """
     def __init__(self):
         self.user_model = ""
-        self.actions = []
-
-        # Once scoring function is complete, will implement
+        self.actions = deque()
         self.model_score = 0
 
     # Print the current C2STEM model state
@@ -40,4 +45,4 @@ class LearnerModel:
         """
         print("Actions taken by the student:")
         for action in self.actions:
-            print(f"Time: {action.t}, Action Type: {action.action_type}, Block: {action.block}")
+            print(action)

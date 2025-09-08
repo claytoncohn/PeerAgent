@@ -87,9 +87,14 @@ async def handler(websocket):
 
                 # Process C2STEM physics actions
                 if message['type'] == "action":
-                    agent.learner_model.actions.append(C2STEMAction(message['data']))
-                    logging.info(f"Action added:\nTime: {agent.learner_model.actions[-1].t}, Action Type: {agent.learner_model.actions[-1].action_type}, Block: {agent.learner_model.actions[-1].block}")
-                
+                    action = C2STEMAction(message['data'])
+                    agent.learner_model.actions.append(
+                        {"time": action.t, "type": action.action_type, "block": action.block}
+                    )
+                    if len(agent.learner_model.actions) > Config.n_actions:
+                        agent.learner_model.actions.popleft()
+                    logging.info(f"Action added:\n{agent.learner_model.actions[-1]}")
+
                 # Update the user model
                 elif message['type'] == "state":
                     computational_model_state.set_user_model(str(message['data']))
@@ -105,7 +110,6 @@ async def handler(websocket):
         logging.error(f"WebSocket connection closed: {e}")
     except Exception as e:
         logging.error(f"Error in handler: {e}")
-
 
 def run_websocket_server():
     """

@@ -15,6 +15,7 @@ class Config:
     word_threshold = int(os.getenv("MODEL_WORD_THRESHOLD"))
     retrieved_domain_knowledge_save_path = os.getenv("RETRIEVED_DOMAIN_KNOWLEDGE_SAVE_PATH")
     c2stem_task = os.getenv("C2STEM_TASK")
+    n_actions = int(os.getenv("N_ACTIONS"))
 
     # Testing
     group = os.getenv("GROUP")

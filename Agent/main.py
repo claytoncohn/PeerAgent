@@ -88,12 +88,13 @@ async def handler(websocket):
                 # Process C2STEM physics actions
                 if message['type'] == "action":
                     action = C2STEMAction(message['data'])
-                    agent.learner_model.actions.append(
-                        {"time": action.t, "type": action.action_type, "block": action.block}
-                    )
-                    if len(agent.learner_model.actions) > Config.n_actions:
-                        agent.learner_model.actions.popleft()
-                    logging.info(f"Action added:\n{agent.learner_model.actions[-1]}")
+                    if action.action_type not in {"togglePause","stopAllScripts"}:
+                        agent.learner_model.actions.append(
+                            {"time": action.t, "type": action.action_type, "block": action.block}
+                        )
+                        if len(agent.learner_model.actions) > Config.n_actions:
+                            agent.learner_model.actions.popleft()
+                        logging.info(f"Action added:\n{agent.learner_model.actions[-1]}")
 
                 # Update the user model
                 elif message['type'] == "state":
@@ -147,7 +148,6 @@ def run_websocket_server():
 
     # Run the WebSocket server using asyncio's event loop
     asyncio.run(websocket_server())
-
 
 async def main():
     """

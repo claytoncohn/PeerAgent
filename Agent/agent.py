@@ -55,7 +55,7 @@ class Agent:
         Loads the contents of a file into a string.
     _save_messages()
         Saves the conversation history to a file in JSON format.
-    _get_openai_response(messages, temperature=0.0)
+    _get_openai_response(messages, reasoning="mininmal", verbosity="low")
         Calls OpenAI's API to generate a response based on the provided conversation history.
     _print_messages(i=0)
         Prints the stored conversation messages along with metadata.
@@ -85,6 +85,9 @@ class Agent:
     """
 
     def __init__(self,use_gui=False):
+                
+        self.openai_client = openai.OpenAI()
+
         # Currently hard-coded but will need to be dynamic
         self.group = 0
 
@@ -179,17 +182,17 @@ class Agent:
             # Merge messages sent/received to/from OpenAI w/ timestamps
             save_messages = []
             for i in range(len(self.messages)):
-                m = self.messages[i]
+                m = self.messages[i].copy()
                 m["timestamp"] = self.message_timestamps[i]
                 save_messages.append(m)
 
             with open(save_path, 'w') as f:
-                json.dump(self.messages, f, indent=4)
+                json.dump(save_messages, f, indent=4)
                 logging.info(f"Successfully saved conversation from Agent class to: '{save_path}'")
         except Exception as e:
             logging.error(f"Error saving conversation from Agent class to: '{save_path}': {e}")
 
-    def _get_openai_response(self, messages, temperature=0.0):
+    def _get_openai_response(self, messages, reasoning="low", verbosity="low"):
         """
         Calls the OpenAI API to generate a response based on the provided conversation history.
 
@@ -231,13 +234,14 @@ class Agent:
         """
         for i in range(Config.max_retries):
             try:
-                response = openai.chat.completions.create(
+                response = self.openai_client.responses.create(
                     model=Config.model,
-                    temperature=temperature,
-                    messages=messages
+                    input=messages,
+                    reasoning={"effort": reasoning},
+                    text={"verbosity": verbosity}
                 )
                 logging.info(f"Successfully called OpenAI API in Agent class.'")
-                return response.choices[0].message.content
+                return response.output_text
             except openai.RateLimitError:
                 logging.error(f"Open AI Rate limit exceeded for response call from Agent, retry {i+1}/{Config.max_retries}.")
                 time.sleep(Config.backoff_factor * (2 ** i))
@@ -468,10 +472,9 @@ class Agent:
         intro_str_rephrase = self._get_openai_response(
             messages=
                 [
-                    {"role": "system", "content": "Rephrase this introduction:\n"},
+                    {"role": "system", "content": "Rephrase this introduction with no formatting and only once:\n"},
                     {"role": "user", "content": intro_str}
-                ],
-            temperature=0.5
+                ]
         )
         return intro_str_rephrase
     

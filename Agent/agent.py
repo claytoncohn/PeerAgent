@@ -251,7 +251,7 @@ class Agent:
             except openai.APIError as e:
                 logging.error(f"OpenAI API error for response call from Agent: {e}, retry {i+1}/{Config.max_retries}")
                 time.sleep(Config.backoff_factor * (2 ** i))
-        return "I'm sorry, I don't think I'm understanding you correctly. Can you explain?"
+        return "There was an error. Please ask your teacher or research for help."
         
     def _print_messages(self,i=0):
         """

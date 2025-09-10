@@ -98,9 +98,11 @@ async def handler(websocket):
 
                 # Update the user model
                 elif message['type'] == "state":
-                    computational_model_state.set_user_model(str(message['data']))
-                    agent.learner_model.user_model = computational_model_state.user_model
-                    logging.info(f"User model updated: {agent.learner_model.user_model}")
+                    new_state = str(message['data'])
+                    if new_state != computational_model_state.user_model:
+                        computational_model_state.set_user_model(new_state)
+                        agent.learner_model.user_model = computational_model_state.user_model
+                        logging.info(f"User model updated: {agent.learner_model.user_model}")
                     
                 else:
                     await websocket.send(message['data'])

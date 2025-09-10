@@ -192,7 +192,7 @@ class Agent:
         except Exception as e:
             logging.error(f"Error saving conversation from Agent class to: '{save_path}': {e}")
 
-    def _get_openai_response(self, messages, reasoning="low", verbosity="low"):
+    def _get_openai_response(self, messages, reasoning="low", verbosity="low",legacy_llm=False):
         """
         Calls the OpenAI API to generate a response based on the provided conversation history.
 
@@ -234,14 +234,23 @@ class Agent:
         """
         for i in range(Config.max_retries):
             try:
-                response = self.openai_client.responses.create(
-                    model=Config.model,
-                    input=messages,
-                    reasoning={"effort": reasoning},
-                    text={"verbosity": verbosity}
-                )
-                logging.info(f"Successfully called OpenAI API in Agent class.'")
-                return response.output_text
+                if not legacy_llm:
+                    response = self.openai_client.responses.create(
+                        model=Config.model,
+                        input=messages,
+                        reasoning={"effort": reasoning},
+                        text={"verbosity": verbosity}
+                    )
+                    logging.info(f"Successfully called OpenAI API in Agent class.'")
+                    return response.output_text
+                else:
+                    response = self.openai_client.responses.create(
+                        model="gpt-4o-2024-08-06",
+                        input=messages,
+                        temperature=0.0
+                    )
+                    logging.info(f"Successfully called OpenAI API in Agent class.'")
+                    return response.output_text
             except openai.RateLimitError:
                 logging.error(f"Open AI Rate limit exceeded for response call from Agent, retry {i+1}/{Config.max_retries}.")
                 time.sleep(Config.backoff_factor * (2 ** i))
@@ -390,7 +399,7 @@ class Agent:
         #     print(f"Truncation count: {self.message_truncation_count}")
         #     print("***************************************************************************\n\n")
 
-        response_text = self._get_openai_response(truncated_messages)
+        response_text = self._get_openai_response(truncated_messages,legacy_llm=True)
         if not self.use_gui: 
             print(f"\n{Config.agent_name}: {response_text}\n")
         self.messages.append({"role": "assistant", "content": response_text})
@@ -455,7 +464,7 @@ class Agent:
         current_group_query_model_string = f"Student Group:\n1\n\Student Query:\n{user_query}\n\nStudent Computational Model:\n{self.learner_model.user_model}"
         summary_messages.append({"role": "user", "content": current_group_query_model_string})
 
-        summary = self._get_openai_response(summary_messages)
+        summary = self._get_openai_response(summary_messages,legacy_llm=True)
         logging.info(f"\n\nRetrieved the following summary of the students' current problem in the Agent class: {summary}\n\n")
         return summary
        
@@ -474,7 +483,8 @@ class Agent:
                 [
                     {"role": "system", "content": "Rephrase this introduction with no formatting and only once:\n"},
                     {"role": "user", "content": intro_str}
-                ]
+                ],
+            legacy_llm=True
         )
         return intro_str_rephrase
     

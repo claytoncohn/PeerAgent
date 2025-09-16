@@ -105,9 +105,9 @@ async def handler(websocket):
                         logging.info(f"User model updated: {agent.learner_model.user_model}")
 
                 elif message['type'] == "group":
-                    logging.info(f"User Action Group: {str(message['data'])}")
+                    logging.info(f"User Action Group Updated: {str(message['data'])}")
                 elif message['type'] == "score":
-                    logging.info(f"User Action Score: {message['data']}")
+                    logging.info(f"User Action Score Updated: {message['data']}")
                 else:
                     await websocket.send(message['data'])
             except json.JSONDecoderError:

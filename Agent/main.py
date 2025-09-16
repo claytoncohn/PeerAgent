@@ -103,7 +103,11 @@ async def handler(websocket):
                         computational_model_state.set_user_model(new_state)
                         agent.learner_model.user_model = computational_model_state.user_model
                         logging.info(f"User model updated: {agent.learner_model.user_model}")
-                    
+
+                elif message['type'] == "group":
+                    logging.info(f"User Action Group: {str(message['data'])}")
+                elif message['type'] == "score":
+                    logging.info(f"User Action Score: {message['data']}")
                 else:
                     await websocket.send(message['data'])
             except json.JSONDecoderError:

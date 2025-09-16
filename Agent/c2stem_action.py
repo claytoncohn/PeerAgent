@@ -94,11 +94,17 @@ class C2STEMAction:
         elif self.action_type=="moveBlock":
             block_str = self.data['args'][0]
             if len(block_str) > 0:
-                mtch = re.search(r's="([^"]+)"', block_str)
-                self.block = mtch.group(1)
-                block_id = self.data['args'][3][0][0]
-                if block_id:
-                    self.block_map[block_id] = self.block
+                if "s=" in block_str:
+                    mtch = re.search(r's="([^"]+)"', block_str)
+                    self.block = mtch.group(1)
+                    block_id = self.data['args'][3][0][0]
+                    if block_id:
+                        self.block_map[block_id] = self.block
+                else:
+                    if block_str in self.block_map:
+                        self.block = self.block_map[block_str]
+                    else:
+                        self.block = ''
             else:
                 self.block = ''
             logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")

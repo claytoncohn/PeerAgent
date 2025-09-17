@@ -88,7 +88,7 @@ async def handler(websocket):
                 # Process C2STEM physics actions
                 if message['type'] == "action":
                     action = C2STEMAction(message['data'])
-                    if action.action_type not in {"togglePause","stopAllScripts"}:
+                    if action.action_type not in {"togglePause", "stopAllScripts", "toggleWatcher", "tableDialog", "graphDialog"}:
                         agent.learner_model.actions.append(
                             {"time": action.t, "type": action.action_type, "block": action.block}
                         )
@@ -118,6 +118,7 @@ async def handler(websocket):
     except Exception as e:
         logging.error(f"Error in handler: {e}")
 
+
 def run_websocket_server():
     """
     Starts and runs a WebSocket server on a separate thread.
@@ -143,6 +144,7 @@ def run_websocket_server():
         If the server is interrupted manually, it shuts down gracefully.
 
     """
+
     async def websocket_server():
         logging.info("Starting WebSocket server on ws://localhost:8080")
         # Start the WebSocket server and run it indefinitely
@@ -154,6 +156,7 @@ def run_websocket_server():
 
     # Run the WebSocket server using asyncio's event loop
     asyncio.run(websocket_server())
+
 
 async def main():
     """
@@ -169,7 +172,7 @@ async def main():
     try:
         # Starts the WebSocket server in a separate thread.
         websocket_thread = threading.Thread(target=run_websocket_server, daemon=True)
-        websocket_thread.start() # Start the thread
+        websocket_thread.start()  # Start the thread
 
         # Run initialize_agent_server in the main thread
         await initialize_agent_server()
@@ -180,7 +183,8 @@ async def main():
         # Handle unexpected errors
         print(f"An unexpected error occurred: {e}")
 
-if __name__ =="__main__":
+
+if __name__ == "__main__":
     """
     Entry point for the agent server script.
 
@@ -194,9 +198,9 @@ if __name__ =="__main__":
     Exception
         If `Config.env` is not set to "dev" or "prod".
     """
-    if Config.env=="dev":
+    if Config.env == "dev":
         agent.talk()
-    elif Config.env=="prod":
+    elif Config.env == "prod":
         try:
             asyncio.run(main())
         except Exception as e:

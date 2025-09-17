@@ -144,6 +144,15 @@ class C2STEMAction:
             else:
                 self.block = ""
                 logging.error(f"No 's' attribute found in block string: {data}")
+        elif self.action_type == "toggleWatcher":
+            self.block = self.data['args'][0]
+            logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
+        elif self.action_type == "tableDialog":
+            self.block = ""
+            logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
+        elif self.action_type == "graphDialog":
+            self.block = ""
+            logging.info(f"Action received at {self.t}: action={self.action_type}, block={self.block}")
         else:
             self.block = ""
 

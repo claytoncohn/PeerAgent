@@ -108,6 +108,8 @@ async def handler(websocket):
                     logging.info(f"User Action Group Updated: {str(message['data'])}")
                 elif message['type'] == "score":
                     logging.info(f"User Action Score Updated: {message['data']}")
+                elif message['type'] == "segment":
+                    logging.info(f"User Task Context Updated: {message['data']}")
                 else:
                     await websocket.send(message['data'])
             except json.JSONDecoderError:

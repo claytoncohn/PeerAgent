@@ -29,6 +29,8 @@ async def initialize_agent_server():
     This function initializes the WebSocket connection for the agent server. 
     It invokes the agent's talk` method. It also handles exceptions during initialization.
 
+    This class also handles students' computational model state and actions, updating the learner model accordingly.
+
     Raises
     ------
     Exception
@@ -85,16 +87,16 @@ async def handler(websocket):
                 # Parse the incoming message
                 message = json.loads(message)
 
+                time_now = int(time.time()*1000)
+
                 # Process C2STEM physics actions
                 if message['type'] == "action":
                     action = C2STEMAction(message['data'])
                     if action.action_type not in {"togglePause", "stopAllScripts", "toggleWatcher", "tableDialog", "graphDialog"}:
-                        agent.learner_model.actions.append(
-                            {"time": action.t, "type": action.action_type, "block": action.block}
+                        agent.learner_model.raw_actions.append(
+                            {"time": time_now, "type": action.action_type, "block": action.block}
                         )
-                        if len(agent.learner_model.actions) > Config.n_actions:
-                            agent.learner_model.actions.popleft()
-                        logging.info(f"Action added:\n{agent.learner_model.actions[-1]}")
+                        logging.info(f"Action added:\n{agent.learner_model.raw_actions[-1]}")
 
                 # Update the user model
                 elif message['type'] == "state":
@@ -105,10 +107,17 @@ async def handler(websocket):
                         logging.info(f"User model updated: {agent.learner_model.user_model}")
 
                 elif message['type'] == "group":
-                    logging.info(f"User Action Group Updated: {str(message['data'])}")
+                    agent.learner_model.action_groups.append({"time":time_now,"action":message['data']})
+                    logging.info(f"User Action Group Updated: {agent.learner_model.action_groups[-1]['action']}")
+
                 elif message['type'] == "score":
-                    logging.info(f"User Action Score Updated: {message['data']}")
+                    agent.learner_model.model_scores.append({"time":time_now,"scores":message['data']})
+                    agent.learner_model.model_scores[-1]["scores"]["total_score"] = sum(message['data'].values())
+                    logging.info(f"User Action Score Updated: {agent.learner_model.model_scores[-1]['scores']['total_score']}")
+
                 elif message['type'] == "segment":
+                    agent.learner_model.task_contexts.append({"time":time_now,"segment":message['data']})
+                    print(agent.learner_model.task_contexts)
                     logging.info(f"User Task Context Updated: {message['data']}")
                 else:
                     await websocket.send(message['data'])

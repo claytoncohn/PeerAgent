@@ -1,4 +1,5 @@
 from collections import deque
+from globals import Config
 
 class LearnerModel:
     """
@@ -9,23 +10,33 @@ class LearnerModel:
     ----------
     user_model : str
         A string representing the students' current computational model in C2STEM.
-    actions : deque
-        A deque of the last N actions (defined in .env) taken by the student in the C2STEM environment. 
+    raw_actions : deque
+        A deque of the actions taken by the student in the C2STEM environment. 
         Each action is represented as a dictionary with keys "time", "type", and "block".
-    model_score : int
-        A score representing the quality of the student's computational model.
-
+    action_groups : deque
+        A deque of the action groups taken by the student with keys "time" and "action".
+    model_scores: deque
+        A deque of the model scores with keys "time" and "scores", where "scores" is a dictionary of individual scores and a "total_score".
+    task_contexts: deque
+        A deque of the task contexts with keys "time" and "segment", where "segment" is a string representing the current task segment.
+    
     Methods
     -------
     print_model_state()
         Prints the current state of the C2STEM model.
-    print_actions()
+    print_raw_actions()
         Prints the list of the last N actions (defined in .env) taken by the student in the C2STEM environment.
+    stringify_action_groups()
+        Converts the action groups to a string representation.
     """
+
     def __init__(self):
         self.user_model = ""
-        self.actions = deque()
-        self.model_score = 0
+        self.raw_actions = deque()
+        self.action_groups = deque()
+        self.model_scores = deque()
+        self.task_contexts = deque()
+        # self.strategies = deque()
 
     # Print the current C2STEM model state
     def print_model_state(self):
@@ -37,12 +48,26 @@ class LearnerModel:
         print(f"Current User Model:\n{self.user_model}")
 
     # Print user actions
-    def print_actions(self):
+    def print_raw_actions(self):
         """
         Prints the list of actions taken by the student in the C2STEM environment.
 
-        This method outputs all actions recorded in the `actions` list.
+        This method outputs all actions recorded in the `raw_actions` deque.
         """
         print("Actions taken by the student:")
-        for action in self.actions:
+        for action in self.raw_actions:
             print(action)
+
+    def stringify_action_groups(self):
+        """
+        Converts the action groups to a string representation.
+
+        This method concatenates the string representations of all action groups
+        in the `action_groups` deque, separated by newlines.
+
+        Returns
+        -------
+        str
+            A string representation of all action groups.
+        """
+        return "\n".join(str(group["action"]) for group in self.action_groups)

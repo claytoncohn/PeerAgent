@@ -1,5 +1,7 @@
 from collections import deque
 from globals import Config
+import datetime
+import pytz
 
 class LearnerModel:
     """
@@ -39,6 +41,13 @@ class LearnerModel:
         self.model_scores = deque()
         self.task_contexts = deque()
         self.strategies = deque()
+        self.needed_domain_knowledge = deque()
+
+        utc_now = datetime.datetime.now(pytz.utc)
+        central_tz = pytz.timezone('America/Chicago')
+        central_now = utc_now.astimezone(central_tz)
+        formatted_time = central_now.strftime('%Y-%m-%d %H:%M:%S %Z%z')
+        self.needed_domain_knowledge.append({"time":formatted_time,"summary":"Initial domain knowledge needed.","knowledge":"Students must begin by initializing variables under the [When Green Flag Clicked] block."})
 
     # Print the current C2STEM model state
     def print_model_state(self):

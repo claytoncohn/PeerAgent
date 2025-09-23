@@ -16,6 +16,7 @@ class Config:
     retrieved_domain_knowledge_save_path = os.getenv("RETRIEVED_DOMAIN_KNOWLEDGE_SAVE_PATH")
     c2stem_task = os.getenv("C2STEM_TASK")
     n_actions = int(os.getenv("N_ACTIONS"))
+    n_seconds = int(os.getenv("N_SECONDS"))
 
     # Testing
     group = os.getenv("GROUP")

@@ -631,8 +631,8 @@ class Agent:
 
         while True:
             try:
-                logging.info("Strategy generation task - waiting 60 seconds")
-                await asyncio.sleep(60)  # Wait 60 seconds
+                logging.info(f"Strategy generation task - waiting {Config.n_seconds} seconds")
+                await asyncio.sleep(Config.n_seconds)  
                 logging.info(f"Strategy generation task running - checking action count")
 
                 # Check if we have enough actions to analyze

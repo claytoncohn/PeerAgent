@@ -26,7 +26,7 @@ async def initialize_agent_server():
     """
     Initializes the agent server.
 
-    This function initializes the WebSocket connection for the agent server. 
+    This function initializes the WebSocket connection for the agent server.
     It invokes the agent's talk` method. It also handles exceptions during initialization.
 
     This class also handles students' computational model state and actions, updating the learner model accordingly.
@@ -36,6 +36,8 @@ async def initialize_agent_server():
     Exception
         If an error occurs while sending the URL or initializing the agent server.
     """
+    # Start the strategy generation task
+    agent.start_strategy_generation()
     agent.talk()
 
 
@@ -117,7 +119,6 @@ async def handler(websocket):
 
                 elif message['type'] == "segment":
                     agent.learner_model.task_contexts.append({"time":time_now,"segment":message['data']})
-                    print(agent.learner_model.task_contexts)
                     logging.info(f"User Task Context Updated: {message['data']}")
                 else:
                     await websocket.send(message['data'])

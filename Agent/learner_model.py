@@ -36,7 +36,7 @@ class LearnerModel:
         self.action_groups = deque()
         self.model_scores = deque()
         self.task_contexts = deque()
-        # self.strategies = deque()
+        self.strategies = deque()
 
     # Print the current C2STEM model state
     def print_model_state(self):

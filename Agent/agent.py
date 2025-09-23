@@ -108,6 +108,7 @@ class Agent:
         logging.info(f"Successfully initialized Agent class in '{Config.env}' environment.")
 
         self.message_truncation_count = 0
+        self.strategy_generation_task = None
 
     def _get_formatted_time(self):
         """
@@ -559,6 +560,8 @@ class Agent:
         """
         Launches the Gradio GUI for interacting with the agent.
         """
+        import threading
+
         with gr.Blocks() as demo:
             with gr.Row():
                 # Image c/o FlatIcon.com:
@@ -588,11 +591,160 @@ class Agent:
             # end_btn = gr.Button("End Conversation")
             # end_btn.click(self._end_conversation)
 
-        demo.launch(share=False,inbrowser=False)
+        # Launch Gradio in a separate thread to prevent blocking the async event loop
+        gradio_thread = threading.Thread(target=lambda: demo.launch(share=False, inbrowser=False), daemon=True)
+        gradio_thread.start()
+
+        # Keep the main thread alive to allow async tasks to run
+        try:
+            while True:
+                import time
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logging.info("Shutting down gracefully")
+            self.stop_strategy_generation()
     
+    async def _generate_strategies_periodically(self):
+        """
+        Asynchronously generates learning strategies every minute based on recent student actions.
+
+        This method:
+        1. Checks if there are at least Config.n_actions in the action_groups deque
+        2. Creates a message with the strategies prompt and last n actions
+        3. Calls OpenAI API to generate strategy analysis
+        4. Saves the result to a JSON file in saved_chats/strategies
+        5. Appends the strategy to the learner model's strategies deque
+
+        The function runs continuously every 60 seconds until cancelled.
+        """
+        import asyncio
+        import os
+
+        logging.info("Strategy generation periodic task started - entering main loop")
+
+        while True:
+            try:
+                logging.info("Strategy generation task - waiting 60 seconds")
+                await asyncio.sleep(60)  # Wait 60 seconds
+                logging.info(f"Strategy generation task running - checking action count")
+
+                # Check if we have enough actions to analyze
+                if len(self.learner_model.action_groups) < Config.n_actions:
+                    logging.info(f"Not enough actions for strategy generation: {len(self.learner_model.action_groups)}/{Config.n_actions}")
+                    continue
+
+                # Get the last n_actions from action_groups
+                recent_actions = list(self.learner_model.action_groups)[-Config.n_actions:]
+
+                # Format the actions for the prompt
+                actions_text = "\n".join([str(action["action"]) for action in recent_actions])
+
+                # Load the strategies prompt
+                strategies_prompt = self._load_file("prompts/strategies_prompt.txt")
+
+                # Create messages for OpenAI API
+                strategy_messages = [
+                    {"role": "system", "content": strategies_prompt},
+                    {"role": "user", "content": actions_text}
+                ]
+
+                # Get strategy analysis from OpenAI
+                strategy_response = self._get_openai_response(strategy_messages, legacy_llm=False)
+
+                # Parse JSON response
+                try:
+                    strategy_data = json.loads(strategy_response)
+                    summary = strategy_data.get("summary", "")
+                    strategy = strategy_data.get("strategy", "")
+                except json.JSONDecodeError:
+                    logging.error(f"Failed to parse strategy response as JSON: {strategy_response}")
+                    continue
+
+                # Create timestamp
+                timestamp = self._get_formatted_time()
+
+                # Create strategy entry for JSON file
+                strategy_entry = {
+                    "timestamp": timestamp,
+                    "summary": summary,
+                    "strategy": strategy
+                }
+
+                # Save to strategies folder with same naming convention
+                strategies_save_path = f"saved_chats/strategies/{Config.c2stem_task}_Group{self.group}_{epoch_time}_STRATEGIES.json"
+
+                # Ensure strategies directory exists
+                os.makedirs("saved_chats/strategies", exist_ok=True)
+
+                # Append to strategies JSON file
+                try:
+                    # Read existing file if it exists
+                    if os.path.exists(strategies_save_path):
+                        with open(strategies_save_path, 'r') as f:
+                            strategies_list = json.load(f)
+                    else:
+                        strategies_list = []
+
+                    # Append new strategy
+                    strategies_list.append(strategy_entry)
+
+                    # Write back to file
+                    with open(strategies_save_path, 'w') as f:
+                        json.dump(strategies_list, f, indent=4)
+
+                    logging.info(f"Strategy saved to: {strategies_save_path}")
+
+                except Exception as e:
+                    logging.error(f"Error saving strategy to file: {e}")
+                    continue
+
+                # Add to learner model's strategies deque
+                strategy_dict = {"time": timestamp, "strategy": strategy}
+                self.learner_model.strategies.append(strategy_dict)
+
+                logging.info(f"Strategy generated and added: {strategy}")
+
+            except asyncio.CancelledError:
+                logging.info("Strategy generation task cancelled")
+                break
+            except Exception as e:
+                logging.error(f"Error in strategy generation: {e}")
+                # Continue the loop even if there's an error
+
+    def start_strategy_generation(self):
+        """
+        Starts the periodic strategy generation task.
+        Always runs in a separate thread with its own event loop to avoid blocking.
+        """
+        logging.info("start_strategy_generation called")
+        if self.strategy_generation_task is None or self.strategy_generation_task.done():
+            import threading
+            import asyncio
+
+            def run_in_thread():
+                logging.info("Strategy generation thread started")
+                asyncio.run(self._generate_strategies_periodically())
+
+            strategy_thread = threading.Thread(target=run_in_thread, daemon=True)
+            strategy_thread.start()
+            logging.info("Strategy generation task started in separate thread")
+        else:
+            logging.info("Strategy generation task already running")
+
+    def stop_strategy_generation(self):
+        """
+        Stops the periodic strategy generation task.
+        """
+        if self.strategy_generation_task and not self.strategy_generation_task.done():
+            self.strategy_generation_task.cancel()
+            logging.info("Strategy generation task stopped")
+        else:
+            logging.info("Strategy generation task stop requested (may be running in separate thread)")
+
     def _end_conversation(self):
         """
         Terminates the conversation and handles any cleanup tasks.
         """
+        self.stop_strategy_generation()
         self._print_messages()
         os._exit(0)

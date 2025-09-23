@@ -38,6 +38,8 @@ async def initialize_agent_server():
     """
     # Start the strategy generation task
     agent.start_strategy_generation()
+    # Start the domain knowledge retrieval task
+    agent.start_domain_knowledge_retrieval()
     agent.talk()
 
 
@@ -159,12 +161,17 @@ def run_websocket_server():
 
     async def websocket_server():
         logging.info("Starting WebSocket server on ws://localhost:8080")
-        # Start the WebSocket server and run it indefinitely
-        async with websockets.serve(handler, "localhost", 8080):
-            try:
-                await asyncio.Future()  # run forever
-            except KeyboardInterrupt:
-                logging.info("Shutting down the WebSocket server")
+        try:
+            # Start the WebSocket server and run it indefinitely
+            async with websockets.serve(handler, "localhost", 8080):
+                logging.info("WebSocket server successfully started and listening on ws://localhost:8080")
+                try:
+                    await asyncio.Future()  # run forever
+                except KeyboardInterrupt:
+                    logging.info("Shutting down the WebSocket server")
+        except Exception as e:
+            logging.error(f"Failed to start WebSocket server: {e}")
+            raise
 
     # Run the WebSocket server using asyncio's event loop
     asyncio.run(websocket_server())
@@ -185,6 +192,9 @@ async def main():
         # Starts the WebSocket server in a separate thread.
         websocket_thread = threading.Thread(target=run_websocket_server, daemon=True)
         websocket_thread.start()  # Start the thread
+
+        # Give the WebSocket server a moment to start up
+        await asyncio.sleep(1)
 
         # Run initialize_agent_server in the main thread
         await initialize_agent_server()

@@ -44,6 +44,10 @@ class Agent:
         The total number of words in the conversation history, used for monitoring token usage.
     message_truncation_count : int
         The number of times messages have been truncated to stay within token limits.
+    strategy_generation_task : asyncio.Task or None
+        The async task for periodic strategy generation, if running.
+    domain_knowledge_task : asyncio.Task or None
+        The async task for periodic domain knowledge retrieval, if running.
 
     Methods
     -------
@@ -79,6 +83,12 @@ class Agent:
         Starts the periodic strategy generation task in a separate thread.
     stop_strategy_generation()
         Stops the periodic strategy generation task.
+    _retrieve_domain_knowledge_periodically()
+        Asynchronously retrieves domain knowledge every n seconds based on the student's current model.
+    start_domain_knowledge_retrieval()
+        Starts the periodic domain knowledge retrieval task in a separate thread.
+    stop_domain_knowledge_retrieval()
+        Stops the periodic domain knowledge retrieval task.
     _end_conversation()
         Ends the conversation and handles cleanup tasks.
 
@@ -116,6 +126,7 @@ class Agent:
 
         self.message_truncation_count = 0
         self.strategy_generation_task = None
+        self.domain_knowledge_task = None
 
     def _get_formatted_time(self):
         """
@@ -200,7 +211,7 @@ class Agent:
         except Exception as e:
             logging.error(f"Error saving conversation from Agent class to: '{save_path}': {e}")
 
-    def _get_openai_response(self, messages, reasoning="low", verbosity="low",legacy_llm=False):
+    def _get_openai_response(self, messages, reasoning="low", verbosity="low", legacy_llm=False):
         """
         Calls the OpenAI API to generate a response based on the provided conversation history.
 
@@ -212,7 +223,7 @@ class Agent:
         Parameters
         ----------
         messages : list of dict
-            A list of dictionaries representing the conversation history, with each dictionary 
+            A list of dictionaries representing the conversation history, with each dictionary
             containing the role (e.g., "system", "user", "assistant") and the content of the message.
 
         Returns
@@ -249,7 +260,7 @@ class Agent:
                         reasoning={"effort": reasoning},
                         text={"verbosity": verbosity}
                     )
-                    logging.info(f"Successfully called OpenAI API in Agent class.'")
+                    logging.info(f"Successfully called OpenAI API in Agent class.")
                     return response.output_text
                 else:
                     response = self.openai_client.responses.create(
@@ -257,7 +268,7 @@ class Agent:
                         input=messages,
                         temperature=0.0
                     )
-                    logging.info(f"Successfully called OpenAI API in Agent class.'")
+                    logging.info(f"Successfully called OpenAI API in Agent class.")
                     return response.output_text
             except openai.RateLimitError:
                 logging.error(f"Open AI Rate limit exceeded for response call from Agent, retry {i+1}/{Config.max_retries}.")
@@ -336,53 +347,17 @@ class Agent:
         - The conversation history is maintained in `self.messages`, where each entry is a dictionary with keys "role" and "content".
         - The method sets `self.has_spoken` to `True` after the first query to indicate that the agent has responded.
         """
+        # Get domain context from the latest needed_domain_knowledge
+        if len(self.learner_model.needed_domain_knowledge) > 0:
+            domain_context = self.learner_model.needed_domain_knowledge[-1]["knowledge"]
+        else:
+            domain_context = "Students must begin by initializing variables under the [When Green Flag Clicked] block."
+
         if not self.has_spoken:
-            # First query: Perform RAG retrieval, first summarize the user's query and computational model
-            query_plus_comp_model_summary = self._get_query_plus_comp_model_summary(user_query)
-
-            # Get embeddings
-            q_embed = self.RAG.get_embeddings([query_plus_comp_model_summary])
-
-            # Handle q_embed being None
-            if q_embed is None:
-                logging.error("Failed to retrieve embeddings in Agent class, using fallback domain context.")
-                domain_context = "No domain knowledge available due to failed embedding retrieval."
-            else:
-
-                # Embedding retrieval successful
-                q_embed = q_embed[0] 
-
-                retrieval_result = self.RAG.retrieve(q_embed, 3)
-                if retrieval_result is None or "matches" not in retrieval_result or not retrieval_result["matches"]:
-                    logging.error("Failed to retrieve knowledge base matches in Agent class, using fallback domain context.")
-                    domain_context = "No domain knowledge available currently due to failed RAG retrieval."
-                else:
-
-                    # Matches retrieved successfully
-                    matches = retrieval_result["matches"]
-                    domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
-
-            # Save retrieved domain knowledge
-            rag_retrieval_save_path = Config.retrieved_domain_knowledge_save_path+Config.c2stem_task+"_Group"+str(self.group)+"_"+epoch_time+"_RAG.json"
-
-            try:
-                with open(rag_retrieval_save_path, "a") as f:
-                    domain_knowledge_dict = {
-                        "timestamp": self._get_formatted_time(),
-                        "query_logs_summary": query_plus_comp_model_summary,
-                        "domain_knowledge_retrieved": domain_context,
-                    }
-                    json.dump(domain_knowledge_dict, f, indent=4)
-                    logging.info(f"Saved retrieved domain knowledge in Agent class to: '{rag_retrieval_save_path}'")
-            except Exception as e:
-                logging.error(f"Error saving retrieved domain knowledge in Agent class to: '{rag_retrieval_save_path}': {e}")
-            
-            # Update messages with domain context (fallback or actual context)
+            # First query: Update system message with domain context
             self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
-    
             # Create the initial user message and student model
             user_message_str = f"Student Query:\n{user_query}\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
-        
         else:
             # Subsequent queries: only include the user query/response in the messages + computational model
             user_message_str = user_query
@@ -718,6 +693,134 @@ class Agent:
                 logging.error(f"Error in strategy generation: {e}")
                 # Continue the loop even if there's an error
 
+    async def _retrieve_domain_knowledge_periodically(self):
+        """
+        Asynchronously retrieves domain knowledge every n seconds based on the student's current model.
+
+        This method:
+        1. Waits for Config.n_seconds/2 initially to stagger with strategy generation
+        2. Creates a message with the domain knowledge prompt and current user model
+        3. Calls OpenAI API to generate domain knowledge analysis
+        4. Performs RAG retrieval based on the analysis
+        5. Saves the result to a JSON file in saved_chats/retrieved_domain_knowledge
+        6. Appends the knowledge to the learner model's needed_domain_knowledge deque
+
+        The function runs continuously every Config.n_seconds until cancelled.
+        """
+        import asyncio
+        import os
+
+        logging.info("Domain knowledge retrieval periodic task started - entering main loop")
+
+        # Initial delay to stagger with strategy generation
+        logging.info(f"Domain knowledge task - initial wait {Config.n_seconds // 2} seconds to stagger")
+        await asyncio.sleep(Config.n_seconds // 2)
+
+        while True:
+            try:
+                logging.info(f"Domain knowledge task - waiting {Config.n_seconds} seconds")
+                await asyncio.sleep(Config.n_seconds)
+                logging.info("Domain knowledge task running - analyzing current model")
+
+                # Load the domain knowledge prompt
+                domain_knowledge_prompt = self._load_file(Config.rag_domain_knowledge_prompt_path)
+                if not domain_knowledge_prompt:
+                    logging.error("Failed to load domain knowledge prompt")
+                    continue
+
+                # Create messages for OpenAI API
+                domain_messages = [
+                    {"role": "system", "content": domain_knowledge_prompt},
+                    {"role": "user", "content": self.learner_model.user_model}
+                ]
+
+                # Get domain knowledge analysis from OpenAI
+                domain_response = self._get_openai_response(domain_messages, legacy_llm=False)
+
+                # Parse JSON response
+                try:
+                    domain_data = json.loads(domain_response)
+                    summary = domain_data.get("summary", "")
+                    knowledge_query = domain_data.get("recommended_domain_knowledge", "")
+                except json.JSONDecodeError:
+                    logging.error(f"Failed to parse domain knowledge response as JSON: {domain_response}")
+                    continue
+
+                # Perform RAG retrieval
+                try:
+                    # Get embeddings for the knowledge query
+                    logging.info(f"Performing RAG retrieval for domain knowledge with query: {knowledge_query}")
+                    q_embed = self.RAG.get_embeddings([knowledge_query])
+
+                    if q_embed is None:
+                        logging.error("Failed to retrieve embeddings for domain knowledge")
+                        domain_context = "No domain knowledge available due to failed embedding retrieval."
+                    else:
+                        # Embedding retrieval successful
+                        q_embed = q_embed[0]
+
+                        retrieval_result = self.RAG.retrieve(q_embed, 3)
+                        if retrieval_result is None or "matches" not in retrieval_result or not retrieval_result["matches"]:
+                            logging.error("Failed to retrieve knowledge base matches for domain knowledge")
+                            domain_context = "No domain knowledge available currently due to failed RAG retrieval."
+                        else:
+                            # Matches retrieved successfully
+                            matches = retrieval_result["matches"]
+                            domain_context = "\n\n".join([m["metadata"]["text"] for m in matches])
+
+                except Exception as e:
+                    logging.error(f"Error during RAG retrieval: {e}")
+                    domain_context = "Error occurred during domain knowledge retrieval."
+
+                # Create timestamp
+                timestamp = self._get_formatted_time()
+
+                # Create domain knowledge entry for JSON file
+                domain_entry = {
+                    "timestamp": timestamp,
+                    "summary": summary,
+                    "recommended_domain_knowledge": knowledge_query,
+                    "knowledge": domain_context
+                }
+
+                # Save to retrieved_domain_knowledge folder with same naming convention
+                domain_save_path = f"{Config.retrieved_domain_knowledge_save_path}{Config.c2stem_task}_Group{self.group}_{epoch_time}_RAG.json"
+
+                # Append to domain knowledge JSON file
+                try:
+                    # Read existing file if it exists
+                    if os.path.exists(domain_save_path):
+                        with open(domain_save_path, 'r') as f:
+                            domain_list = json.load(f)
+                    else:
+                        domain_list = []
+
+                    # Append new domain knowledge
+                    domain_list.append(domain_entry)
+
+                    # Write back to file
+                    with open(domain_save_path, 'w') as f:
+                        json.dump(domain_list, f, indent=4)
+
+                    logging.info(f"Domain knowledge saved to: {domain_save_path}")
+
+                except Exception as e:
+                    logging.error(f"Error saving domain knowledge to file: {e}")
+                    continue
+
+                # Add to learner model's needed_domain_knowledge deque
+                domain_dict = {"time": timestamp, "summary": summary, "recommended_domain_knowledge": knowledge_query, "knowledge": domain_context}
+                self.learner_model.needed_domain_knowledge.append(domain_dict)
+
+                logging.info(f"Domain knowledge generated and added: {self.learner_model.needed_domain_knowledge[-1]}")
+
+            except asyncio.CancelledError:
+                logging.info("Domain knowledge retrieval task cancelled")
+                break
+            except Exception as e:
+                logging.error(f"Error in domain knowledge retrieval: {e}")
+                # Continue the loop even if there's an error
+
     def start_strategy_generation(self):
         """
         Starts the periodic strategy generation task.
@@ -738,6 +841,26 @@ class Agent:
         else:
             logging.info("Strategy generation task already running")
 
+    def start_domain_knowledge_retrieval(self):
+        """
+        Starts the periodic domain knowledge retrieval task.
+        Always runs in a separate thread with its own event loop to avoid blocking.
+        """
+        logging.info("start_domain_knowledge_retrieval called")
+        if self.domain_knowledge_task is None or self.domain_knowledge_task.done():
+            import threading
+            import asyncio
+
+            def run_in_thread():
+                logging.info("Domain knowledge retrieval thread started")
+                asyncio.run(self._retrieve_domain_knowledge_periodically())
+
+            domain_thread = threading.Thread(target=run_in_thread, daemon=True)
+            domain_thread.start()
+            logging.info("Domain knowledge retrieval task started in separate thread")
+        else:
+            logging.info("Domain knowledge retrieval task already running")
+
     def stop_strategy_generation(self):
         """
         Stops the periodic strategy generation task.
@@ -748,10 +871,21 @@ class Agent:
         else:
             logging.info("Strategy generation task stop requested (may be running in separate thread)")
 
+    def stop_domain_knowledge_retrieval(self):
+        """
+        Stops the periodic domain knowledge retrieval task.
+        """
+        if self.domain_knowledge_task and not self.domain_knowledge_task.done():
+            self.domain_knowledge_task.cancel()
+            logging.info("Domain knowledge retrieval task stopped")
+        else:
+            logging.info("Domain knowledge retrieval task stop requested (may be running in separate thread)")
+
     def _end_conversation(self):
         """
         Terminates the conversation and handles any cleanup tasks.
         """
         self.stop_strategy_generation()
+        self.stop_domain_knowledge_retrieval()
         self._print_messages()
         os._exit(0)

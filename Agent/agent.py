@@ -73,6 +73,12 @@ class Agent:
         Handles chatbot responses within the Gradio GUI.
     _talk_with_gui()
         Launches the Gradio-based GUI for user interaction.
+    _generate_strategies_periodically()
+        Asynchronously generates learning strategies every minute based on recent student actions.
+    start_strategy_generation()
+        Starts the periodic strategy generation task in a separate thread.
+    stop_strategy_generation()
+        Stops the periodic strategy generation task.
     _end_conversation()
         Ends the conversation and handles cleanup tasks.
 
@@ -82,6 +88,7 @@ class Agent:
     - The retrieval-augmented generation (RAG) component helps retrieve domain knowledge relevant to the user's query.
     - Conversation truncation is applied when the token limit is exceeded.
     - The agent supports both terminal-based and GUI-based interactions.
+    - Periodic strategy generation runs automatically every minute, analyzing recent student actions to classify learning strategies.
     """
 
     def __init__(self,use_gui=False):

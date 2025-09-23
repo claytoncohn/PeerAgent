@@ -19,6 +19,8 @@ class LearnerModel:
         A deque of the model scores with keys "time" and "scores", where "scores" is a dictionary of individual scores and a "total_score".
     task_contexts: deque
         A deque of the task contexts with keys "time" and "segment", where "segment" is a string representing the current task segment.
+    strategies: deque
+        A deque of strategies used by the student with keys "time" and "strategy", where "strategy" is a string representing the strategy used.
     
     Methods
     -------

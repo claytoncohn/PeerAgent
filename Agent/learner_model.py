@@ -34,6 +34,21 @@ class LearnerModel:
         Converts the action groups to a string representation.
     """
 
+    strategies_map = {
+        "DEPTH_FIRST_ENACTING": "Students are currently using the Depth First Enacting strategy, where they build or adjust several blocks in succession without running the code to visualize the object's motion. This approach—similar to coding without periodic testing—is ineffective because it makes debugging harder; students cannot easily identify where their errors occur.",
+        "TINKERING": "Students are currently engaged in Tinkering, a systematic strategy where they make small edits to their computational models and intermittently test them to visualize the object's motion. This informed trial-and-error approach is effective because it helps students see how each change affects the motion.",
+        "TOOL_USE": "Students are using the Graph and Table Tools to visualize how variables change over time. This is a desirable strategy because it shows they are focused on understanding why the objects move the way they do, rather than just trying to make the model work for its own sake through trial-and-error.",
+        "RUN_REPEAT":"Students are repeatedly clicking the Green Flag to test their models and visualize the object's motion on screen without intervening changes. This is generally an ineffective strategy: either they are running the same model while expecting different results—similar to ignoring compiler or interpreter errors—or they are replaying to analyze motion that would be better examined with the Graph and Table Tools.",
+        "DRAFTING": "Students are currently engaged in Drafting, dragging blocks onto the screen that are not yet connected to the runnable model. This is similar to commenting or creating placeholder code to integrate later. Drafting can be an effective way to organize ideas in code form, but it becomes problematic if students don't realize that changes to drafted code will not affect the object's motion."
+    }
+
+    task_contexts_map = {
+        "initialization":"Students are initializing variables in the environment. They need to connect several blocks—speed limit, acceleration, velocity, position, and delta_t—to the [When Green Flag Clicked] block. The sequence should end with the [start_simulation] block, which triggers the simulation loop to run the blocks under [simulation_step].",
+        "updating-variables-every-sim-step":"Students are updating variables at each simulation step. This requires correctly using 'change by' blocks (the equivalent of += in code) to update position and velocity at the start of each loop, based on the kinematic equations. A common mistake is confusing 'set' blocks—used for initialization—with 'change by' blocks—used for updating.",
+        "conditional-clause":"Students are crafting conditional statements to control cruising, deceleration, and stopping. For cruising, they must check if the velocity is greater than the speed limit. For deceleration, they must use kinematic equations to calculate the lookahead distance and determine how far before the stop sign the truck should slow down. For stopping, the truck must have passed the stop sign and its velocity must be less than zero.",
+        "updating-variables-under-conditons":"Students are updating variables within the conditional statements. For cruising, they must set acceleration to zero. For decelerating, they must set acceleration to -4. For stopping, they must stop the simulation."
+    }
+
     def __init__(self):
         self.user_model = ""
         self.raw_actions = deque()

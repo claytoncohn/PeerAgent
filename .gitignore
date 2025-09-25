@@ -3,3 +3,6 @@
 Agent/__pycache__/
 Agent/prompts/
 Agent/test/
+Agent/.DS_Store
+.gitignore
+.DS_Store

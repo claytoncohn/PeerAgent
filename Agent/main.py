@@ -36,9 +36,7 @@ async def initialize_agent_server():
     Exception
         If an error occurs while sending the URL or initializing the agent server.
     """
-    # Start the strategy generation task
     agent.start_strategy_generation()
-    # Start the domain knowledge retrieval task
     agent.start_domain_knowledge_retrieval()
     agent.talk()
 
@@ -131,7 +129,6 @@ async def handler(websocket):
         logging.error(f"WebSocket connection closed: {e}")
     except Exception as e:
         logging.error(f"Error in handler: {e}")
-
 
 def run_websocket_server():
     """

@@ -18,6 +18,7 @@ class Config:
     c2stem_task = os.getenv("C2STEM_TASK")
     n_actions = int(os.getenv("N_ACTIONS"))
     n_seconds = int(os.getenv("N_SECONDS"))
+    n_rubric_scores = int(os.getenv("N_RUBRIC_SCORES"))
 
     # Testing
     group = os.getenv("GROUP")

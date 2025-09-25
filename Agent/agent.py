@@ -59,6 +59,8 @@ class Agent:
         Loads the contents of a file into a string.
     _save_messages()
         Saves the conversation history to a file in JSON format.
+    _save_dialogue_policy_response(response_data)
+        Saves the full dialogue policy response data to a separate file for analysis.
     _get_openai_response(messages, reasoning="mininmal", verbosity="low")
         Calls OpenAI's API to generate a response based on the provided conversation history.
     _print_messages(i=0)
@@ -211,6 +213,39 @@ class Agent:
         except Exception as e:
             logging.error(f"Error saving conversation from Agent class to: '{save_path}': {e}")
 
+    def _save_dialogue_policy_response(self, response_data):
+        """
+        Save the full dialogue policy response data to a separate file for analysis.
+
+        Parameters
+        ----------
+        response_data : dict
+            Dictionary containing timestamp, summary, agent_talk_moves, dialogue_policy, and response.
+        """
+        try:
+            save_path = f"saved_chats/dialogue_management/{Config.c2stem_task}_Group{self.group}_{epoch_time}_DIALOGUE.json"
+
+            # Ensure dialogue_policy directory exists
+            os.makedirs("saved_chats/dialogue_management", exist_ok=True)
+
+            # Read existing file if it exists
+            if os.path.exists(save_path):
+                with open(save_path, 'r') as f:
+                    dialogue_list = json.load(f)
+            else:
+                dialogue_list = []
+
+            # Append new dialogue policy response
+            dialogue_list.append(response_data)
+
+            # Write back to file
+            with open(save_path, 'w') as f:
+                json.dump(dialogue_list, f, indent=4)
+
+            logging.info(f"Successfully saved dialogue policy response to: '{save_path}'")
+        except Exception as e:
+            logging.error(f"Error saving dialogue policy response to: '{save_path}': {e}")
+
     def _get_openai_response(self, messages, reasoning="low", verbosity="low", legacy_llm=False):
         """
         Calls the OpenAI API to generate a response based on the provided conversation history.
@@ -321,12 +356,11 @@ class Agent:
 
     def _process_query(self, user_query):
         """
-        Processes a user query, retrieves relevant domain knowledge, interacts with OpenAI's API, and updates the conversation.
+        Processes a user query using the dialogue policy interface format, interacts with OpenAI's API, and updates the conversation.
 
-        This method determines whether it's the first query in the conversation. If so, it retrieves domain knowledge
-        using a retrieval-augmented generation (RAG) approach and appends relevant context to the system message.
-        It then sends the conversation history to OpenAI's chat completion API, retrieves the response, and appends it 
-        to the conversation.
+        This method creates a structured message containing the student query, current model state, task context,
+        mastery scores, current strategy, and domain knowledge. It sends this to the OpenAI API and processes
+        the structured JSON response, saving the full analysis while storing only the response portion in the conversation.
 
         Parameters
         ----------
@@ -340,28 +374,71 @@ class Agent:
 
         Notes
         -----
-        - For the first query, the method retrieves domain knowledge using RAG and appends it to the system message.
-        - For subsequent queries, only the user query and student model are included in the conversation history.
+        - Creates a structured message with all learner model information for every query.
+        - Processes JSON response containing summary, agent_talk_moves, dialogue_policy, and response fields.
+        - Saves full response data to dialogue_policy folder for analysis.
+        - Stores only the response field in conversation messages for chat flow.
         - If the token count exceeds `Config.word_threshold`, older messages are truncated to fit within the model's limits.
-        - Messages are logged and saved after processing.
-        - The conversation history is maintained in `self.messages`, where each entry is a dictionary with keys "role" and "content".
-        - The method sets `self.has_spoken` to `True` after the first query to indicate that the agent has responded.
+        - Handles JSON parsing errors gracefully with fallback to plain text response.
         """
-        # Get domain context from the latest needed_domain_knowledge
+        # Get domain knowledge from the latest needed_domain_knowledge
         if len(self.learner_model.needed_domain_knowledge) > 0:
-            domain_context = self.learner_model.needed_domain_knowledge[-1]["knowledge"]
+            domain_knowledge = self.learner_model.needed_domain_knowledge[-1]["knowledge"]
         else:
-            domain_context = "Students must begin by initializing variables under the [When Green Flag Clicked] block."
+            domain_knowledge = "Students must begin by initializing variables under the [When Green Flag Clicked] block."
 
-        if not self.has_spoken:
-            # First query: Update system message with domain context
-            self.messages[0]["content"] += f"\n\nDomain Context:\n{domain_context}"
-            # Create the initial user message and student model
-            user_message_str = f"Student Query:\n{user_query}\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
-        else:
-            # Subsequent queries: only include the user query/response in the messages + computational model
-            user_message_str = user_query
-            user_message_str += f"\n\n[CURRENT STUDENT MODEL]:\n{self.learner_model.user_model}"
+        # Get task context from the latest task_contexts
+        task_context = "No task context currently available."
+        if len(self.learner_model.task_contexts) > 0:
+            try:
+                latest_task = self.learner_model.task_contexts[-1]["segment"]
+                task_context = self.learner_model.task_contexts_map[latest_task]
+            except KeyError as e:
+                logging.error(f"Unknown task context key: {latest_task}")
+
+        # Get current strategy from the latest strategies
+        current_strategy = "No strategy currently available."
+        if len(self.learner_model.strategies) > 0:
+            try:
+                latest_strategy = self.learner_model.strategies[-1]["strategy"]
+                current_strategy = self.learner_model.strategies_map[latest_strategy]
+            except KeyError as e:
+                logging.error(f"Unknown strategy key: {latest_strategy}")
+
+        # Get mastery scores (using most recent scores or default to 0)
+        physics_mastery = 0
+        computing_mastery = 0
+        overall_mastery = 0
+        if len(self.learner_model.model_scores) > 0:
+            latest_scores = self.learner_model.model_scores[-1]["scores"]
+            physics_mastery = round(latest_scores.get("physics_mastery", (latest_scores["total_score"]/Config.n_rubric_scores)*100),2)
+            computing_mastery = round(latest_scores.get("computing_mastery", (latest_scores["total_score"]/Config.n_rubric_scores)*100),2)
+            overall_mastery = round(latest_scores.get("overall_mastery", (latest_scores["total_score"]/Config.n_rubric_scores)*100),2)
+
+        # Create the structured user message
+        user_message_str = f"""[STUDENT_QUERY]
+{user_query}
+
+[STUDENT_MODEL]:
+{self.learner_model.user_model}
+
+[TASK_CONTEXT]:
+{task_context}
+
+[PHYSICS_MASTERY]:
+{physics_mastery}
+
+[COMPUTING_MASTERY]:
+{computing_mastery}
+
+[OVERALL_MASTERY]:
+{overall_mastery}
+
+[CURRENT_STRATEGY]:
+{current_strategy}
+
+[DOMAIN_KNOWLEDGE]:
+{domain_knowledge}"""
         
         self.messages.append({"role": "user", "content": user_message_str})
         self.message_timestamps.append(self._get_formatted_time())
@@ -382,10 +459,46 @@ class Agent:
         #     print(f"Truncation count: {self.message_truncation_count}")
         #     print("***************************************************************************\n\n")
 
-        response_text = self._get_openai_response(truncated_messages,legacy_llm=True)
-        if not self.use_gui: 
-            print(f"\n{Config.agent_name}: {response_text}\n")
-        self.messages.append({"role": "assistant", "content": response_text})
+        response_text = self._get_openai_response(truncated_messages, legacy_llm=True)
+
+        # Parse the JSON response and extract the response field
+        logging.info(f"Raw OpenAI response: {response_text}")
+        try:
+            response_data = json.loads(response_text)
+            agent_response = response_data.get("response", response_text)  # Fallback to full text if no response field
+            logging.info(f"Extracted agent response: {agent_response}")
+
+            # Save the full JSON response with timestamp for analysis
+            full_response_data = {
+                "timestamp": self._get_formatted_time(),
+                "summary": response_data.get("summary", ""),
+                "agent_talk_moves": response_data.get("agent_talk_moves", ""),
+                "dialogue_policy": response_data.get("dialogue_policy", ""),
+                "response": agent_response
+            }
+
+            if not self.use_gui:
+                print(f"\n{Config.agent_name}: {agent_response}\n")
+
+            # Store only the response portion in messages for conversation flow
+            self.messages.append({"role": "assistant", "content": agent_response})
+
+        except json.JSONDecodeError:
+            logging.error(f"Failed to parse agent response as JSON: {response_text}")
+            # Fallback to treating the entire response as the agent response
+            agent_response = response_text
+            full_response_data = {
+                "timestamp": self._get_formatted_time(),
+                "summary": "",
+                "agent_talk_moves": "",
+                "dialogue_policy": "",
+                "response": agent_response
+            }
+            if not self.use_gui:
+                print(f"\n{Config.agent_name}: {agent_response}\n")
+
+            self.messages.append({"role": "assistant", "content": agent_response})
+
         self.message_timestamps.append(self._get_formatted_time())
 
         self.running_word_count += \
@@ -401,9 +514,8 @@ class Agent:
         self._print_messages(2)
         self._save_messages()
 
-        # Set flag to indicate that the agent has spoken
-        if not self.has_spoken:
-            self.has_spoken = True
+        # Save the full response data for analysis (separate from conversation messages)
+        self._save_dialogue_policy_response(full_response_data)
 
     def _get_query_plus_comp_model_summary(self, user_query):
         """

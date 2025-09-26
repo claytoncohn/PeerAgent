@@ -26,7 +26,8 @@ app.add_middleware(
         "http://127.0.0.1:8002",  # Alternative localhost format
         "http://127.0.0.1:3000",  # Alternative localhost format
         "https://agent.c2-stem.org",  # Production origin
-        "http://127.0.0.1:7860",  # Gradio default
+        "http://127.0.0.1:7860",
+        "https://collboration.c2stem.org"# Gradio default
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -40,8 +41,8 @@ The file listens to the messages on websocket and saves them to userState.
 """
 
 #  Global variables and data structure
-chat_window_URL = "URL= http://127.0.0.1:7860",
-# chat_window_URL = "URL= https://agent.c2-stem.org",
+# chat_window_URL = "URL= http://127.0.0.1:7860",
+chat_window_URL = "URL= https://agent.c2-stem.org",
 # computational_model_state = C2STEMState()
 user_computational_models: Dict[str, C2STEMState] = {}
 agent = Agent(use_gui=True)

@@ -114,7 +114,8 @@ async def handler(websocket):
 
                 elif message['type'] == "score":
                     agent.learner_model.model_scores.append({"time":time_now,"scores":message['data']})
-                    agent.learner_model.model_scores[-1]["scores"]["total_score"] = sum(message['data'].values())
+                    total_score_values = [v for k, v in message['data'].items() if k not in {"physics_mastery","computing_mastery","overall_mastery"}]
+                    agent.learner_model.model_scores[-1]["scores"]["total_score"] = sum(total_score_values)
                     logging.info(f"User Action Score Updated: {agent.learner_model.model_scores[-1]['scores']['total_score']}")
 
                 elif message['type'] == "segment":

@@ -130,6 +130,12 @@ class Agent:
         self.strategy_generation_task = None
         self.domain_knowledge_task = None
 
+        self.user_list = []
+        self.user_hash = {}
+        self.chat_histories = {}
+        self.individual_messages = {}
+
+
     def _get_formatted_time(self):
         """
         Get the current time formatted as a string in Central Time (CT) with timezone details.
@@ -164,14 +170,14 @@ class Agent:
             Contents of the file or an empty string if the file is not found.
         """
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 logging.info(f"Successfully loaded file from Agent class: '{file_path}'")
                 return f.read()
         except (FileNotFoundError, IOError) as e:
             logging.error(f"Error loading file from Agent class: '{file_path}': {e}")
             return ""
         
-    def _save_messages(self):
+    def _save_messages(self, username, session):
         """
         Save the conversation messages to a file in JSON format.
 
@@ -198,17 +204,25 @@ class Agent:
             If an error occurs while writing to the file.
         """
         try:
-            save_path = Config.convo_save_path+"/"+Config.c2stem_task+"_Group"+str(self.group)+"_"+epoch_time+"_CONVO.json"
+            save_path = ''
+            for filename in os.listdir(Config.convo_save_path):
+                if session in filename:
+                    save_path = Config.convo_save_path + "/" + filename
+
+            # save_path = Config.convo_save_path+"/"+Config.c2stem_task+"_Group"+str(self.group)+"_"+epoch_time+"_CONVO.json"
+            if len(save_path) < 1:
+                save_path = Config.convo_save_path + "/" + Config.c2stem_task + "_Group" + str(
+                    self.group) + "_" + self.user_hash[session] + "_" + session + "_" + epoch_time + "_CONVO.json"
 
             # Merge messages sent/received to/from OpenAI w/ timestamps
             save_messages = []
-            for i in range(len(self.messages)):
-                m = self.messages[i].copy()
+            for i in range(len(self.individual_messages[session])):
+                m = self.individual_messages[session][i].copy()
                 m["timestamp"] = self.message_timestamps[i]
                 save_messages.append(m)
 
             with open(save_path, 'w') as f:
-                json.dump(save_messages, f, indent=4)
+                json.dump(self.individual_messages[session], f, indent=4)
                 logging.info(f"Successfully saved conversation from Agent class to: '{save_path}'")
         except Exception as e:
             logging.error(f"Error saving conversation from Agent class to: '{save_path}': {e}")
@@ -316,7 +330,7 @@ class Agent:
                 time.sleep(Config.backoff_factor * (2 ** i))
         return "There was an error. Please ask your teacher or research for help."
         
-    def _print_messages(self,i=0):
+    def _print_messages(self, session, i=0):
         """
         Print the stored messages along with their roles and content.
 
@@ -344,17 +358,17 @@ class Agent:
         """
        
         print("\n\n***************************************************************************")
-        for m in self.messages[-i:]:
+        for m in self.individual_messages[session][-i:]:
             print("------------------------------------------------------------------------")
             print("ROLE:", m["role"])
             print("CONTENT:", m["content"])
         print("------------------------------------------------------------------------")
-        print(f"Total messages in list: {len(self.messages)}")
+        print(f"Total messages in list: {len(self.individual_messages[session])}")
         print(f"Total word count for all messages: {self.running_word_count}")
         print(f"Truncation count: {self.message_truncation_count}")
         print("***************************************************************************\n\n")
 
-    def _process_query(self, user_query):
+    def _process_query(self, user_query, username, session):
         """
         Processes a user query using the dialogue policy interface format, interacts with OpenAI's API, and updates the conversation.
 
@@ -627,7 +641,7 @@ class Agent:
 
         # self._end_conversation()
     
-    def _gui_respond(self, message, chat_history):
+    def _gui_respond(self, message, chat_history, request: gr.Request):
         """
         Handles the chatbot's response to a user message within the Gradio GUI.
 
@@ -645,10 +659,23 @@ class Agent:
         chat_history : list of tuples
             The updated chat history, with the new user message and the chatbot's response appended.
         """
-        self._process_query(message)
-        bot_message = self.messages[-1]["content"]
-        chat_history.append((message, bot_message))
-        return "",chat_history
+        username = request.request.cookies['username']
+        if request.session_hash not in self.user_list:
+            self.user_list.append(request.session_hash)
+            self.user_hash[request.session_hash] = username
+        if request.session_hash not in self.individual_messages:
+            self.individual_messages[request.session_hash] = self.messages.copy()
+        self._process_query(message, username, request.session_hash)
+        # self._process_query(message)
+        # bot_message = self.messages[-1]["content"]
+        # chat_history.append((message, bot_message))
+        # return "",chat_history
+        bot_message = self.individual_messages[request.session_hash][-1]["content"]
+        if request.session_hash not in self.chat_histories:
+            self.chat_histories[request.session_hash] = chat_history
+        # chat_history.append((message, bot_message))
+        self.chat_histories[request.session_hash].append((message, bot_message))
+        return "", self.chat_histories[request.session_hash]
     
     def _talk_with_gui(self):
         """

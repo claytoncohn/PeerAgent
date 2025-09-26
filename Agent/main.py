@@ -20,15 +20,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8002",  # Your frontend origin
-        "http://localhost:3000",  # Common React dev server
-        "http://127.0.0.1:8002",  # Alternative localhost format
-        "http://127.0.0.1:3000",  # Alternative localhost format
-        "https://agent.c2-stem.org",  # Production origin
-        "http://127.0.0.1:7860",
-        "https://collboration.c2stem.org"# Gradio default
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

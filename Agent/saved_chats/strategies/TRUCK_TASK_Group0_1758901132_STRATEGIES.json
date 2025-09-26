@@ -1,0 +1,32 @@
+[
+    {
+        "timestamp": "2025-09-26 11:05:52 CDT-0500",
+        "summary": "Initial small build then a single test, followed by a long stretch of building without further execution.",
+        "strategy": "DEPTH_FIRST_ENACTING"
+    },
+    {
+        "timestamp": "2025-09-26 11:06:56 CDT-0500",
+        "summary": "Started with a few BUILDs, ran once, then proceeded with a long stretch of BUILD actions without further testing.",
+        "strategy": "DEPTH_FIRST_ENACTING"
+    },
+    {
+        "timestamp": "2025-09-26 11:08:01 CDT-0500",
+        "summary": "Built several blocks, executed once to test, then continued building without further tests.",
+        "strategy": "TINKERING"
+    },
+    {
+        "timestamp": "2025-09-26 11:09:10 CDT-0500",
+        "summary": "Mostly building without testing: three BUILDs then one EXECUTE, followed by a long streak of BUILDs with no further runs.",
+        "strategy": "DEPTH_FIRST_ENACTING"
+    },
+    {
+        "timestamp": "2025-09-26 11:10:16 CDT-0500",
+        "summary": "Mostly long BUILD streaks with a single EXECUTE in between; building continues without further testing.",
+        "strategy": "DEPTH_FIRST_ENACTING"
+    },
+    {
+        "timestamp": "2025-09-26 11:11:20 CDT-0500",
+        "summary": "Started with several BUILDs, executed once to test, then continued with many BUILD actions without further testing.",
+        "strategy": "DEPTH_FIRST_ENACTING"
+    }
+]

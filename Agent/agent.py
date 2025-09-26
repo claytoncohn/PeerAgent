@@ -220,7 +220,7 @@ class Agent:
         Parameters
         ----------
         response_data : dict
-            Dictionary containing timestamp, summary, agent_talk_moves, dialogue_policy, and response.
+            Dictionary containing timestamp, summary, agent_talk_move, dialogue_policy, and response.
         """
         try:
             save_path = f"saved_chats/dialogue_management/{Config.c2stem_task}_Group{self.group}_{epoch_time}_DIALOGUE.json"
@@ -375,7 +375,7 @@ class Agent:
         Notes
         -----
         - Creates a structured message with all learner model information for every query.
-        - Processes JSON response containing summary, agent_talk_moves, dialogue_policy, and response fields.
+        - Processes JSON response containing summary, agent_talk_move, dialogue_policy, and response fields.
         - Saves full response data to dialogue_policy folder for analysis.
         - Stores only the response field in conversation messages for chat flow.
         - If the token count exceeds `Config.word_threshold`, older messages are truncated to fit within the model's limits.
@@ -472,7 +472,7 @@ class Agent:
             full_response_data = {
                 "timestamp": self._get_formatted_time(),
                 "summary": response_data.get("summary", ""),
-                "agent_talk_moves": response_data.get("agent_talk_moves", ""),
+                "agent_talk_move": response_data.get("agent_talk_move", ""),
                 "dialogue_policy": response_data.get("dialogue_policy", ""),
                 "response": agent_response
             }
@@ -490,7 +490,7 @@ class Agent:
             full_response_data = {
                 "timestamp": self._get_formatted_time(),
                 "summary": "",
-                "agent_talk_moves": "",
+                "agent_talk_move": "",
                 "dialogue_policy": "",
                 "response": agent_response
             }

@@ -94,11 +94,8 @@ async def handler(websocket):
                 # Process C2STEM physics actions
                 if message['type'] == "action":
                     action = C2STEMAction(message['data'])
-                    if action.action_type not in {"togglePause", "stopAllScripts", "toggleWatcher", "tableDialog", "graphDialog"}:
-                        agent.learner_model.raw_actions.append(
-                            {"time": time_now, "type": action.action_type, "block": action.block}
-                        )
-                        logging.info(f"Action added:\n{agent.learner_model.raw_actions[-1]}")
+                    agent.learner_model.raw_actions.append({"time":time_now,"action":action})
+                    logging.info(f"Action added:\n{agent.learner_model.raw_actions[-1]}")
 
                 # Update the user model
                 elif message['type'] == "state":

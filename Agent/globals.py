@@ -11,6 +11,7 @@ class Config:
     prompt_path = os.getenv("PROMPT_PATH")
     rag_summary_prompt_path = os.getenv("RAG_SUMMARY_PROMPT_PATH")
     rag_domain_knowledge_prompt_path = os.getenv("RAG_DOMAIN_KNOWLEDGE_PROMPT_PATH")
+    learner_state_prompt_path = os.getenv("LEARNER_STATE_PROMPT_PATH")
     summary_few_shot_instances_path = os.getenv("SUMMARY_FEW_SHOT_INSTANCES_PATH")
     convo_save_path = os.getenv("CONVO_SAVE_PATH")
     word_threshold = int(os.getenv("MODEL_WORD_THRESHOLD"))

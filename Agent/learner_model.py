@@ -50,18 +50,22 @@ class LearnerModel:
     }
 
     def __init__(self):
+        utc_now = datetime.datetime.now(pytz.utc)
+        central_tz = pytz.timezone('America/Chicago')
+        central_now = utc_now.astimezone(central_tz)
+        formatted_time = central_now.strftime('%Y-%m-%d %H:%M:%S %Z%z')
+
         self.user_model = ""
         self.raw_actions = deque()
         self.action_groups = deque()
         self.model_scores = deque()
         self.task_contexts = deque()
         self.strategies = deque()
-        self.needed_domain_knowledge = deque()
 
-        utc_now = datetime.datetime.now(pytz.utc)
-        central_tz = pytz.timezone('America/Chicago')
-        central_now = utc_now.astimezone(central_tz)
-        formatted_time = central_now.strftime('%Y-%m-%d %H:%M:%S %Z%z')
+        self.learner_state = deque()
+        self.learner_state.append({"time":formatted_time,"summary":"Initial learner state.","learner_state":"STARTING"})
+
+        self.needed_domain_knowledge = deque()
         self.needed_domain_knowledge.append({"time":formatted_time,"summary":"Initial domain knowledge needed.","recommended_domain_knowledge":"Students should start by initializing variables","knowledge":"Students must begin by initializing variables under the [When Green Flag Clicked] block."})
 
     # Print the current C2STEM model state
